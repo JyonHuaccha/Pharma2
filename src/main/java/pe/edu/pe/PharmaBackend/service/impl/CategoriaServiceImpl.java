@@ -10,6 +10,7 @@ import pe.edu.pe.PharmaBackend.entity.Categoria;
 import pe.edu.pe.PharmaBackend.exception.RecursosNoEncontradoException;
 import pe.edu.pe.PharmaBackend.exception.ReglaNegocioException;
 import pe.edu.pe.PharmaBackend.repository.CategoriaRepository;
+import pe.edu.pe.PharmaBackend.repository.ProductoRepository;
 import pe.edu.pe.PharmaBackend.service.service.CategoriaService;
 
 import java.time.LocalDateTime;
@@ -18,9 +19,11 @@ import java.time.LocalDateTime;
 public class CategoriaServiceImpl implements CategoriaService {
     private static final Logger LOG = LoggerFactory.getLogger(CategoriaServiceImpl.class);
     private final CategoriaRepository categoriaRepository;
+    private final ProductoRepository productoRepository;
 
-    public CategoriaServiceImpl(CategoriaRepository categoriaRepository) {
+    public CategoriaServiceImpl(CategoriaRepository categoriaRepository, ProductoRepository productoRepository) {
         this.categoriaRepository = categoriaRepository;
+        this.productoRepository = productoRepository;
     }
 
     @Override
@@ -49,7 +52,15 @@ public class CategoriaServiceImpl implements CategoriaService {
                         "Categoria no encontrada con id: "+aLong
                 )
         );
-        categoria.setNombre(t.getNombre());
+
+        String nombre = t.getNombre().trim();
+        if (categoriaRepository.existsByNombreIgnoreCaseAndIdNot(nombre, aLong)) {
+            throw new ReglaNegocioException(
+                    "Ya existe otra categoria con el nombre " + nombre
+            );
+        }
+
+        categoria.setNombre(nombre);
         categoria.setDescripcion(t.getDescripcion());
         categoria.setEstado(t.getEstado());
         categoria.setFechaModificacion(LocalDateTime.now());
@@ -78,6 +89,13 @@ public class CategoriaServiceImpl implements CategoriaService {
                         "Categoria no encontrada con id: "+ aLong
                 )
         );
+
+        if (productoRepository.existsByCategoriaId(aLong)) {
+            throw new ReglaNegocioException(
+                    "No se puede eliminar la categoria porque tiene productos asociados"
+            );
+        }
+
         categoriaRepository.delete(categoria);
     }
 

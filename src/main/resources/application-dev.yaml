@@ -14,8 +14,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
     enabled: true
+
+app:
+  cors:
+    allowed-origins: http://localhost:4200,http://localhost:4201,http://127.0.0.1:4200,http://127.0.0.1:4201
