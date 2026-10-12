@@ -41,7 +41,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setPrecio(t.getPrecio());
         producto.setStock(t.getStock());
         producto.setEstado(t.getEstado());
-        producto.setCategoria(buscarCategoriaPorId(t.getCategoriaId()));
+        Categoria categoria = buscarCategoriaPorId(t.getCategoriaId());
+        validarCategoriaActiva(categoria);
+        producto.setCategoria(categoria);
         Producto prodCreada = productoRepository.save(producto);
         return convertirResponse(prodCreada);
     }
@@ -52,6 +54,13 @@ public class ProductoServiceImpl implements ProductoService {
                         "Categoría no encontrada con id: " + id
                 ));
     }
+    private void validarCategoriaActiva(Categoria categoria) {
+        if (!Boolean.TRUE.equals(categoria.getEstado())) {
+            throw new ReglaNegocioException(
+                    "La categoría \"" + categoria.getNombre() + "\" está inactiva"
+            );
+        }
+    }
 
     @Override
     @Transactional
@@ -61,12 +70,27 @@ public class ProductoServiceImpl implements ProductoService {
                         "Producto no encontrada con id: "+aLong
                 )
         );
-        producto.setNombre(t.getNombre());
+
+        String nombre = t.getNombre().trim();
+        if (productoRepository.existsByNombreIgnoreCaseAndIdNot(nombre, aLong)) {
+            throw new ReglaNegocioException(
+                    "Ya existe un producto con el nombre " + nombre
+            );
+        }
+
+        Categoria categoria = buscarCategoriaPorId(t.getCategoriaId());
+        boolean cambioCategoria = producto.getCategoria() == null
+                || !producto.getCategoria().getId().equals(categoria.getId());
+        if (cambioCategoria) {
+            validarCategoriaActiva(categoria);
+        }
+
+        producto.setNombre(nombre);
         producto.setDescripcion(t.getDescripcion());
         producto.setPrecio(t.getPrecio());
         producto.setStock(t.getStock());
         producto.setEstado(t.getEstado());
-        producto.setCategoria(buscarCategoriaPorId(t.getCategoriaId()));
+        producto.setCategoria(categoria);
         producto.setFechaModificacion(LocalDateTime.now());
 
         Producto prodActualizada = productoRepository.save(producto);
@@ -93,7 +117,13 @@ public class ProductoServiceImpl implements ProductoService {
                         "Producto no encontrada con id: "+ aLong
                 )
         );
-        productoRepository.delete(producto);
+
+        if (!Boolean.TRUE.equals(producto.getEstado())) {
+            throw new ReglaNegocioException("El producto ya está inactivo");
+        }
+
+        producto.setEstado(false);
+        productoRepository.save(producto);
     }
 
     @Override

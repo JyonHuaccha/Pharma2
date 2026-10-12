@@ -42,14 +42,12 @@ public class ClienteServiceImpl
                 .trim()
                 .toLowerCase();
 
-        // Regla de negocio 1
         if (clienteRepository.existsByDni(dni)) {
             throw new ReglaNegocioException(
                     "Ya existe un cliente con el DNI: " + dni
             );
         }
 
-        // Regla de negocio 2
         if (clienteRepository.existsByEmailIgnoreCase(email)) {
             throw new ReglaNegocioException(
                     "Ya existe un cliente con el correo: " + email
@@ -133,7 +131,6 @@ public class ClienteServiceImpl
                 .trim()
                 .toLowerCase();
 
-        // DNI de otro cliente
         if (clienteRepository
                 .existsByDniAndIdNot(dni, id)) {
 
@@ -143,7 +140,6 @@ public class ClienteServiceImpl
             );
         }
 
-        // Email de otro cliente
         if (clienteRepository
                 .existsByEmailIgnoreCaseAndIdNot(
                         email,
@@ -194,10 +190,15 @@ public class ClienteServiceImpl
                                 )
                         );
 
-        clienteRepository.delete(cliente);
+        if (!Boolean.TRUE.equals(cliente.getEstado())) {
+            throw new ReglaNegocioException("El cliente ya está inactivo");
+        }
+
+        cliente.setEstado(false);
+        clienteRepository.save(cliente);
 
         log.info(
-                "Cliente id={} eliminado correctamente",
+                "Cliente id={} dado de baja correctamente",
                 id
         );
     }
