@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.HashSet;
 @Service
 public class VentaServiceImpl implements VentaService {
     private final VentaRepository ventaRepository;
@@ -47,6 +48,12 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional
     public VentaResponseDTO registrar(VentaRequestDTO request) {
+        var productosUnicos = new HashSet<Long>();
+        for (DetalleVentaRequestDTO detalle : request.getDetalles()) {
+            if (!productosUnicos.add(detalle.getProductoId())) {
+                throw new ReglaNegocioException("El mismo producto está repetido en el detalle. Envíalo en una sola línea con la cantidad total.");
+            }
+        }
         Cliente cliente = clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() ->new RecursosNoEncontradoException("Cliente no encontrado con id: "+ request.getClienteId()));
 
@@ -69,10 +76,10 @@ public class VentaServiceImpl implements VentaService {
                 throw new ReglaNegocioException("El producto "+ producto.getNombre()+ " se encuentra inactivo");
             }
 
-            if (producto.getStock()< item.getCantidad()) {
+            if (productoRepository.descontarStock(producto.getId(), item.getCantidad()) == 0) {
 
-                throw new ReglaNegocioException("Stock insuficiente para "+ producto.getNombre()+ ". Disponible: "+ producto.getStock()
-                        + ", solicitado: "+ item.getCantidad());
+                throw new ReglaNegocioException("Stock insuficiente o producto inactivo: " + producto.getNombre()
+                        + ". Actualiza los productos y vuelve a intentarlo.");
             }
 
             BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
@@ -88,7 +95,7 @@ public class VentaServiceImpl implements VentaService {
 
             total = total.add(subtotal);
 
-            producto.setStock(producto.getStock()- item.getCantidad());
+            // El UPDATE condicional descuenta el stock dentro de esta transacción.
         }
 
         venta.setTotal(total);

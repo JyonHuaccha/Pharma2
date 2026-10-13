@@ -9,6 +9,7 @@ import pe.edu.pe.PharmaBackend.entity.Cliente;
 import pe.edu.pe.PharmaBackend.exception.RecursosNoEncontradoException;
 import pe.edu.pe.PharmaBackend.exception.ReglaNegocioException;
 import pe.edu.pe.PharmaBackend.repository.ClienteRepository;
+import pe.edu.pe.PharmaBackend.repository.VentaRepository;
 import pe.edu.pe.PharmaBackend.service.service.ClienteService;
 
 import java.util.List;
@@ -21,10 +22,12 @@ public class ClienteServiceImpl
             LoggerFactory.getLogger(ClienteServiceImpl.class);
 
     private final ClienteRepository clienteRepository;
+    private final VentaRepository ventaRepository;
 
     public ClienteServiceImpl(
-            ClienteRepository clienteRepository) {
+            ClienteRepository clienteRepository, VentaRepository ventaRepository) {
         this.clienteRepository = clienteRepository;
+        this.ventaRepository = ventaRepository;
     }
 
     @Override
@@ -151,6 +154,10 @@ public class ClienteServiceImpl
             );
         }
 
+        if (Boolean.TRUE.equals(cliente.getEstado()) && Boolean.FALSE.equals(request.getEstado())) {
+            validarBaja(id);
+        }
+
         cliente.setDni(dni);
         cliente.setNombres(
                 request.getNombres().trim()
@@ -194,6 +201,7 @@ public class ClienteServiceImpl
             throw new ReglaNegocioException("El cliente ya está inactivo");
         }
 
+        validarBaja(id);
         cliente.setEstado(false);
         clienteRepository.save(cliente);
 
@@ -201,6 +209,12 @@ public class ClienteServiceImpl
                 "Cliente id={} dado de baja correctamente",
                 id
         );
+    }
+
+    private void validarBaja(Long id) {
+        if (ventaRepository.existsByClienteId(id)) {
+            throw new ReglaNegocioException("No se puede eliminar el cliente porque tiene ventas asociadas");
+        }
     }
 
     private ClienteResponseDTO convertirResponse(

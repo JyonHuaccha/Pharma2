@@ -60,6 +60,9 @@ public class CategoriaServiceImpl implements CategoriaService {
             );
         }
 
+        if (Boolean.TRUE.equals(categoria.getEstado()) && Boolean.FALSE.equals(t.getEstado())) {
+            validarBaja(aLong);
+        }
         categoria.setNombre(nombre);
         categoria.setDescripcion(t.getDescripcion());
         categoria.setEstado(t.getEstado());
@@ -90,13 +93,21 @@ public class CategoriaServiceImpl implements CategoriaService {
                 )
         );
 
-        if (productoRepository.existsByCategoriaId(aLong)) {
+        if (!Boolean.TRUE.equals(categoria.getEstado())) {
+            throw new ReglaNegocioException("La categoría ya está inactiva");
+        }
+        validarBaja(aLong);
+        categoria.setEstado(false);
+        categoria.setFechaModificacion(LocalDateTime.now());
+        categoriaRepository.save(categoria);
+    }
+
+    private void validarBaja(Long id) {
+        if (productoRepository.existsByCategoriaId(id)) {
             throw new ReglaNegocioException(
-                    "No se puede eliminar la categoria porque tiene productos asociados"
+                    "No se puede eliminar la categoría porque tiene productos asociados"
             );
         }
-
-        categoriaRepository.delete(categoria);
     }
 
     @Override
