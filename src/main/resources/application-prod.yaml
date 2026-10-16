@@ -21,3 +21,23 @@ springdoc:
     enabled: false
   api-docs:
     enabled: false
+# En produccion solo se conserva la traza funcional de los servicios
+# (parametros, filas y duracion); el SQL y el detalle web se apagan.
+logging:
+  level:
+    root: WARN
+    pe.edu.pe.PharmaBackend: INFO
+    pe.edu.pe.PharmaBackend.service.impl: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.springframework.web: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+# En produccion el secreto NUNCA se escribe en el repositorio:
+# llega por variable de entorno (minimo 32 bytes en Base64).
+app:
+  cors:
+    allowed-origins: ${FRONTEND_ORIGINS:https://pharmasoft.pe.edu.pe}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiracion-minutos: ${JWT_EXPIRACION_MINUTOS:30}

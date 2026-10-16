@@ -20,7 +20,24 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     enabled: true
+# Trazabilidad en desarrollo: se quiere ver el detalle de las
+# consultas y de los parametros que llegan a cada servicio.
+logging:
+  level:
+    root: INFO
+    pe.edu.pe.PharmaBackend: DEBUG
+    pe.edu.pe.PharmaBackend.service.impl: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
 
 app:
   cors:
     allowed-origins: http://localhost:4200,http://localhost:4201,http://127.0.0.1:4200,http://127.0.0.1:4201
+# JWT en desarrollo. El secreto es una clave Base64 de 48 bytes (384 bits).
+# Es SOLO para clase: en produccion llega por variable de entorno.
+  jwt:
+    secret: w9Z6dP/dzykNH/uiI3Z/KGjBlP0H4Ji+Tuq4fm2cTNuLD4jWafu1gBL74V2SJEvy
+    expiracion-minutos: 60

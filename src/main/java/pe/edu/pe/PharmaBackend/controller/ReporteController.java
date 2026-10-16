@@ -2,6 +2,7 @@ package pe.edu.pe.PharmaBackend.controller;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reportes")
+/*
+ * Autorizacion a nivel de metodo: solo quien tenga el permiso
+ * REPORTES_VER (rol ADMIN). Si no lo tiene, Spring lanza
+ * AccessDeniedException y GlobalExceptionHandler responde 403.
+ */
+
+@PreAuthorize("hasAuthority('REPORTES_VER')")
 public class ReporteController {
 
     private final ReporteService reporteService;
@@ -25,10 +33,7 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-    /*
-     * Total facturado y unidades vendidas por categoría.
-     * El rango de fechas es opcional: sin fechas reporta el histórico.
-     */
+
     @GetMapping("/ventas-por-categoria")
     public ResponseEntity<List<VentaPorCategoriaDTO>> ventasPorCategoria(
 
