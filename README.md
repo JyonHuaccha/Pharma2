@@ -36,3 +36,31 @@ Las 24 pruebas manuales del paso 14, sus capturas y el documento PDF están a ca
 ## Entrega de la sesión 10
 
 Rama: `feature/seguridad-jwt`. Por decisión del estudiante, se consolida el trabajo en **un único commit**. La solicitud de incorporación se dirige a `main`, rama principal real de este repositorio. La guía propone cuatro commits y la rama `master`; esta entrega conserva la decisión de un solo commit y el nombre de la rama principal existente.
+
+## Actividad autónoma de la sesión 10
+
+Rama `feature/seguridad-pruebas-huaccha`, creada desde la práctica. Se incorporan:
+
+| Endpoint | Acceso | Comportamiento |
+| --- | --- | --- |
+| `PUT /api/v1/auth/password` | Cualquier usuario autenticado | Obtiene el usuario del token, comprueba la contraseña actual con BCrypt y guarda el nuevo hash. Responde 204, 400 por validación y 409 por contraseña actual incorrecta o reutilización. |
+| `PUT /api/v1/usuarios/{id}/roles` | ADMIN mediante `USUARIOS_ADMINISTRAR` | Reemplaza los roles; devuelve roles y permisos actualizados. Responde 400 por conjunto vacío o IDs nulos, 404 por usuario o rol inexistente y 409 si el administrador intenta quitarse ADMIN. |
+| `PATCH /api/v1/usuarios/{id}/estado` | ADMIN mediante `USUARIOS_ADMINISTRAR` | Cambia el estado conservando la cuenta y sus relaciones. Responde 400 por estado ausente, 404 por usuario inexistente y 409 por desactivación de la propia cuenta. |
+
+`JwtAuthenticationFilter` consulta `UsuarioDetailsService` en cada petición: usa los permisos y el estado actuales de la base, aunque el JWT se haya emitido antes. Un usuario desactivado recibe 401 con su token previo. El cambio de contraseña no revoca tokens emitidos; siguen válidos hasta su expiración si la cuenta continúa activa.
+
+Verificación automatizada del 18/10/2026: **45 pruebas aprobadas**, sin usar Oracle ni iniciar una API real. Se incluyen 25 pruebas nuevas de cambio de contraseña, gestión de cuentas y cadena de seguridad con MockMvc. La prueba de contexto con base de datos no se ejecuta en esta verificación.
+
+```powershell
+.\mvnw.cmd --batch-mode "-Dtest=JwtServiceTest,PermisosPorRolTest,SeguridadEndpointsTest,CambioPasswordTest,GestionUsuarioTest,BajaLogicaTest,ReporteContratoTest" test
+```
+
+Materiales:
+
+- `postman/PharmaSoft-S10-Seguridad.json`: colección con 28 casos, 72 peticiones y preparación adicional. Variables de tokens exportadas vacías. Enviar peticiones individualmente; hay reinicios, esperas y cambios temporales que deben restaurarse.
+- `docs/matriz-seguridad-s10.md`: 16 casos base, cuatro propios de grupos distintos y B-01 a B-08. Los resultados manuales quedan pendientes hasta medirlos y adjuntar capturas.
+- `docs/guia-capturas-s10.md`: precondiciones, secuencia, capturas necesarias y restauración de datos/configuración.
+- `docs/informe-s10.docx` y `docs/informe-s10.pdf`: informe breve de tres páginas con análisis y espacios para registrar resultados reales y hallazgos.
+- `docs/Huaccha_LP2_S10_Autonoma.docx`: informe con anexo de instrucciones y espacios para las capturas. Completar la matriz y el resumen con lo obtenido antes de exportar y entregar el PDF final.
+
+Los tres commits de la actividad tienen sus fechas reales. El criterio de realizarlos en días distintos sigue pendiente; no se simulan fechas ni pruebas manuales. La solicitud de incorporación se dirige a `main`, rama principal existente. No se incluye una ejecución automática de Flyway ni se reinicializa la base actual.
