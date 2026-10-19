@@ -3,8 +3,12 @@ package pe.edu.pe.PharmaBackend.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +16,8 @@ import pe.edu.pe.PharmaBackend.dto.auth.EmpleadoResponseDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.RolResponseDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.UsuarioRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.UsuarioResponseDTO;
+import pe.edu.pe.PharmaBackend.dto.auth.AsignarRolesRequestDTO;
+import pe.edu.pe.PharmaBackend.dto.auth.CambiarEstadoUsuarioRequestDTO;
 import pe.edu.pe.PharmaBackend.service.service.UsuarioService;
 import java.util.List;
 /*
@@ -46,5 +52,21 @@ public class UsuarioController {
     @GetMapping("/roles")
     public ResponseEntity<List<RolResponseDTO>> roles() {
         return ResponseEntity.ok(usuarioService.listarRoles());
+    }
+
+    @PutMapping("/usuarios/{id}/roles")
+    public ResponseEntity<UsuarioResponseDTO> asignarRoles(
+            @PathVariable Long id,
+            @Valid @RequestBody AsignarRolesRequestDTO request,
+            Authentication authentication) {
+        return ResponseEntity.ok(usuarioService.asignarRoles(id, request, authentication.getName()));
+    }
+
+    @PatchMapping("/usuarios/{id}/estado")
+    public ResponseEntity<UsuarioResponseDTO> cambiarEstado(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarEstadoUsuarioRequestDTO request,
+            Authentication authentication) {
+        return ResponseEntity.ok(usuarioService.cambiarEstado(id, request, authentication.getName()));
     }
 }
