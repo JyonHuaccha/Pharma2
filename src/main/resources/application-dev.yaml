@@ -21,14 +21,15 @@ springdoc:
   api-docs:
     enabled: true
 # Trazabilidad en desarrollo: se quiere ver el detalle de las
-# consultas y de los parametros que llegan a cada servicio.
+# consultas y de la actividad funcional, sin exponer parametros sensibles.
 logging:
   level:
     root: INFO
     pe.edu.pe.PharmaBackend: DEBUG
     pe.edu.pe.PharmaBackend.service.impl: DEBUG
     org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+    # Los parametros SQL incluyen hashes de contrasenas; no registrarlos.
+    org.hibernate.orm.jdbc.bind: "OFF"
     org.springframework.web: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
