@@ -64,7 +64,7 @@ En `pharma-frontend/deploy`, ejecutar `docker compose stop redis`. Abrir Categor
 Enviar GET categorías en Postman y abrir Headers de la respuesta. Copiar visualmente `X-Request-Id` y buscarlo en `logs/pharma-backend.log`. Capturar el encabezado y las líneas que llevan el mismo identificador. Cada petición recibe un identificador nuevo; un acierto de caché sigue generando su línea de acceso aunque no entre al servicio.
 
 ### 12 Health público
-Enviar `12 Health público sin detalles` con Authorization → No Auth. Capturar el 200 y únicamente `{"status":"UP"}`. Con admin se permiten componentes; con vendedor siguen ocultos.
+Enviar `12 Health público sin detalles` con Authorization → No Auth. Capturar el 200 y `"status":"UP"`, sin componentes ni detalles internos. Al habilitar probes, Spring Boot también puede mostrar los nombres de grupos `liveness` y `readiness`; esto no expone detalles de Oracle ni Redis. Con admin se permiten componentes; con vendedor siguen ocultos.
 
 ### 13 Métricas restringidas
 Enviar `13 Métricas vendedor prohibidas` con el token vendedor: 403. Capturar URL, estado y respuesta sin mostrar el valor del token. Con admin, las métricas deben responder 200. Para `cache.gets` usar `tag=name:categorias` y `tag=result:hit`.
