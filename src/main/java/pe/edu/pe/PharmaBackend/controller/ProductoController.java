@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.pe.PharmaBackend.dto.ProductoRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.ProductoResponseDTO;
+import pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO;
 import pe.edu.pe.PharmaBackend.service.service.CategoriaService;
 import pe.edu.pe.PharmaBackend.service.service.ProductoService;
 
@@ -29,6 +30,16 @@ public class ProductoController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> findById(@PathVariable Long id){
         return ResponseEntity.ok(productoService.read(id));
+    }
+
+    @GetMapping(params = "pagina")
+    public ResponseEntity<PaginaResponseDTO<ProductoResponseDTO>> listar(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanio,
+            @RequestParam(defaultValue = "nombre") String ordenarPor,
+            @RequestParam(defaultValue = "asc") String direccion,
+            @RequestParam(required = false) Long categoriaId) {
+        return ResponseEntity.ok(productoService.listar(pagina, tamanio, ordenarPor, direccion, categoriaId));
     }
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> create(@Valid @RequestBody ProductoRequestDTO requestDTO){

@@ -3,6 +3,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.pe.PharmaBackend.dto.DetalleVentaRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.DetalleVentaResponseDTO;
@@ -33,7 +34,7 @@ public class VentaServiceImpl implements VentaService {
     private final ProductoRepository productoRepository;
 
     private static final Logger log =
-            LoggerFactory.getLogger(ClienteServiceImpl.class);
+            LoggerFactory.getLogger(VentaServiceImpl.class);
 
     public VentaServiceImpl(
             VentaRepository ventaRepository,
@@ -47,6 +48,7 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "productos", allEntries = true)
     public VentaResponseDTO registrar(VentaRequestDTO request) {
         var productosUnicos = new HashSet<Long>();
         for (DetalleVentaRequestDTO detalle : request.getDetalles()) {
