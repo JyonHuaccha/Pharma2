@@ -12,6 +12,8 @@ spring:
       port: ${REDIS_PORT:6379}
       timeout: 500ms
       connect-timeout: 500ms
+      repositories:
+        enabled: false
   cache:
     type: redis
     cache-names: categorias, productos
