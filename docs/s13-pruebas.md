@@ -6,7 +6,7 @@ Rama: `feature/optimizacion-produccion-huaccha`. Proyecto frontend: `Pharma-fron
 
 1. En el frontend, ejecutar `npm ci` si faltan dependencias y `npm run build -- --stats-json --verbose`.
 2. Desde `pharma-frontend/deploy`, ejecutar `docker compose up -d`.
-3. En el backend, compilar con `./mvnw.cmd clean package`. Las pruebas `CacheOracleRollbackTest` requieren Oracle y Redis; usan la base Redis 15 y revierten sus escrituras en Oracle.
+3. Detener la instancia Java antes de reconstruir su JAR. En el backend, compilar con `./mvnw.cmd clean package` y después iniciarlo de nuevo. Las pruebas `CacheOracleRollbackTest` requieren Oracle y Redis; usan la base Redis 15 y revierten sus escrituras en Oracle.
 4. Definir `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y una `JWT_SECRET` Base64 nueva de al menos 32 bytes. No guardar valores reales en Git. Generación en PowerShell:
 
 ```powershell
