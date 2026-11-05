@@ -7,8 +7,11 @@ import org.springframework.data.repository.query.Param;
 import pe.edu.pe.PharmaBackend.entity.Producto;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
+    Page<Producto> findByCategoriaId(Long categoriaId, Pageable pageable);
     @Modifying(flushAutomatically = true)
     @Query("update Producto p set p.stock = p.stock - :cantidad where p.id = :id and p.estado = true and p.stock >= :cantidad")
     int descontarStock(@Param("id") Long id, @Param("cantidad") Integer cantidad);

@@ -80,6 +80,15 @@ class SeguridadEndpointsTest {
     }
 
     @Test
+    void metricasSoloParaQuienAdministraUsuarios() throws Exception {
+        mvc.perform(get("/actuator/metrics")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/actuator/metrics").header("Authorization", "Bearer " + tokenVendedor()))
+                .andExpect(status().isForbidden());
+        mvc.perform(get("/actuator/metrics").header("Authorization", "Bearer " + tokenAdmin()))
+                .andExpect(status().isNotFound()); // El contexto MVC aislado no registra Actuator.
+    }
+
+    @Test
     void cambiarPasswordSinTokenEs401() throws Exception {
         mvc.perform(put("/api/v1/auth/password").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"passwordActual\":\"Vendedor2026*\",\"passwordNueva\":\"NuevaClave2026\"}"))
