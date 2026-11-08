@@ -24,15 +24,22 @@ springdoc:
 # En produccion solo se conserva la traza funcional de los servicios
 # (parametros, filas y duracion); el SQL y el detalle web se apagan.
 logging:
+  file:
+    name: logs/pharma-backend.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 14
   level:
     root: WARN
     pe.edu.pe.PharmaBackend: INFO
     pe.edu.pe.PharmaBackend.service.impl: INFO
     org.hibernate.SQL: WARN
-    org.hibernate.orm.jdbc.bind: WARN
+    org.hibernate.orm.jdbc.bind: "OFF"
     org.springframework.web: WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId}] %logger{36} - %msg%n"
 # En produccion el secreto NUNCA se escribe en el repositorio:
 # llega por variable de entorno (minimo 32 bytes en Base64).
 app:
