@@ -50,6 +50,7 @@ public class VentaServiceImpl implements VentaService {
     @Transactional
     @CacheEvict(cacheNames = "productos", allEntries = true)
     public VentaResponseDTO registrar(VentaRequestDTO request) {
+        log.info("Inicio registrar venta | lineas={}", request.getDetalles().size());
         var productosUnicos = new HashSet<Long>();
         for (DetalleVentaRequestDTO detalle : request.getDetalles()) {
             if (!productosUnicos.add(detalle.getProductoId())) {
@@ -102,7 +103,9 @@ public class VentaServiceImpl implements VentaService {
 
         venta.setTotal(total);
 
-        Venta guardada =ventaRepository.save(venta);
+        Venta guardada = ventaRepository.save(venta);
+        log.info("Venta preparada | ventaId={} | lineas={} | total={}",
+                guardada.getId(), request.getDetalles().size(), total);
 
         return convertirResponse(guardada);
     }
