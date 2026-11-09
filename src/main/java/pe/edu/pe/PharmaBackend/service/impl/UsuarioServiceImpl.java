@@ -10,6 +10,8 @@ import pe.edu.pe.PharmaBackend.dto.auth.EmpleadoResponseDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.RolResponseDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.UsuarioRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.auth.UsuarioResponseDTO;
+import pe.edu.pe.PharmaBackend.dto.auth.AsignarRolesRequestDTO;
+import pe.edu.pe.PharmaBackend.dto.auth.CambiarEstadoUsuarioRequestDTO;
 import pe.edu.pe.PharmaBackend.entity.Empleado;
 import pe.edu.pe.PharmaBackend.entity.Rol;
 import pe.edu.pe.PharmaBackend.entity.Usuario;
@@ -77,13 +79,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new ReglaNegocioException(
                     "Ya existe un usuario con el nombre: " + username);
         }
-        List<Rol> roles = rolRepository.findAllById(request.getRolIds());
-        if (roles.size() != request.getRolIds().size()) {
-            Set<Long> encontrados = roles.stream().map(Rol::getId).collect(Collectors.toSet());
-            Set<Long> faltantes = new HashSet<>(request.getRolIds());
-            faltantes.removeAll(encontrados);
-            throw new RecursosNoEncontradoException("Roles no encontrados: " + faltantes);
-        }
+        List<Rol> roles = buscarRoles(request.getRolIds());
 // BCrypt solo admite 72 BYTES: una ñ o una tilde ocupan 2 bytes en UTF-8
         if (request.getPassword().getBytes(StandardCharsets.UTF_8).length > 72) {
             throw new ReglaNegocioException("La contraseña no puede superar 72 bytes");
@@ -124,5 +120,52 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .stream()
                 .map(usuarioMapper::toRolResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponseDTO asignarRoles(Long id, AsignarRolesRequestDTO request, String usuarioActual) {
+        Usuario usuario = buscarUsuario(id);
+        List<Rol> roles = buscarRoles(request.getRolIds());
+        if (usuario.getUsername().equalsIgnoreCase(usuarioActual)
+                && roles.stream().noneMatch(rol -> "ADMIN".equals(rol.getNombre()))) {
+            throw new ReglaNegocioException("No puede quitarse a sí mismo el rol ADMIN");
+        }
+        usuario.setRoles(new HashSet<>(roles));
+        Usuario guardado = usuarioRepository.save(usuario);
+        log.info("Roles actualizados: usuario={} roles={} administrador={}",
+                usuario.getUsername(), usuarioMapper.nombresRoles(roles), usuarioActual);
+        return usuarioMapper.toUsuarioResponse(guardado);
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponseDTO cambiarEstado(Long id, CambiarEstadoUsuarioRequestDTO request, String usuarioActual) {
+        Usuario usuario = buscarUsuario(id);
+        if (usuario.getUsername().equalsIgnoreCase(usuarioActual)
+                && Boolean.FALSE.equals(request.getEstado())) {
+            throw new ReglaNegocioException("No puede desactivarse a sí mismo");
+        }
+        usuario.setEstado(request.getEstado());
+        Usuario guardado = usuarioRepository.save(usuario);
+        log.info("Estado actualizado: usuario={} estado={} administrador={}",
+                usuario.getUsername(), usuario.getEstado(), usuarioActual);
+        return usuarioMapper.toUsuarioResponse(guardado);
+    }
+
+    private Usuario buscarUsuario(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursosNoEncontradoException("Usuario no encontrado con id: " + id));
+    }
+
+    private List<Rol> buscarRoles(Set<Long> rolIds) {
+        List<Rol> roles = rolRepository.findAllById(rolIds);
+        Set<Long> encontrados = roles.stream().map(Rol::getId).collect(Collectors.toSet());
+        Set<Long> faltantes = new java.util.TreeSet<>(rolIds);
+        faltantes.removeAll(encontrados);
+        if (!faltantes.isEmpty()) {
+            throw new RecursosNoEncontradoException("Roles no encontrados: " + faltantes);
+        }
+        return roles;
     }
 }
