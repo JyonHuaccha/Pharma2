@@ -2,11 +2,11 @@
 
 | ID | Módulo | Descripción y reproducción | Severidad | Causa | Corrección y commit | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
-| INC-01 | Ventas | Consultar /ventas/buscar con pagina=1. Se devolvía toda la lista y Angular la recortaba. | Alta | Repositorio List con fetch de toda la colección. | Page de cabeceras, countQuery y carga de detalles limitada a los IDs de la página. Backend a70fb25. Angular consume la página en 5306089. | Cerrada |
-| INC-02 | Paginación | Cambiar página de Productos y pulsar F5 reiniciaba la página. Ventas tampoco conservaba los filtros en la URL. | Alta | Estado local en signals y formulario. | Inputs del router, rxResource, linkedSignal y queryParams. Filtros, orden y tamaño vuelven a página 0. Frontend f1edc71 y 5306089. | Cerrada |
-| INC-03 | Ordenamiento | Enviar ordenarPor=fe al buscador de ventas aceptaba un campo incompleto. | Alta | String.contains validaba subcadenas. | Set con coincidencia exacta, tamaño 1..100 y orden secundario por id. Backend a70fb25. | Cerrada |
-| INC-04 | Migraciones | Solo existía V2 y Flyway no estaba integrado. | Alta | Esquema creado mediante Hibernate update. | Flyway con V1-V4, adopción del esquema histórico en dev y validate. Historial nuevo comprobado en Oracle. Backend 7b0cfd7. | Cerrada |
-| INC-05 | Volumen | El script de la guía utiliza productos y la entidad real utiliza producto. | Media | Diferencia de nombres entre la guía y el esquema existente. | V4 y docs/sql/volumen_pruebas.sql usan PRODUCTO; carga separada en PHARMA_S14. Backend 7b0cfd7. | Cerrada |
+| INC-01 | Ventas | Consultar /ventas/buscar con pagina=1. Se devolvía toda la lista y Angular la recortaba. | Alta | Repositorio List con fetch de toda la colección. | Page de cabeceras, countQuery y carga de detalles limitada a los IDs de la página. Backend d751c85. Angular consume la página en 9830aee. | Cerrada |
+| INC-02 | Paginación | Cambiar página de Productos y pulsar F5 reiniciaba la página. Ventas tampoco conservaba los filtros en la URL. | Alta | Estado local en signals y formulario. | Inputs del router, rxResource, linkedSignal y queryParams. Filtros, orden y tamaño vuelven a página 0. Frontend 1e71111 y 9830aee. | Cerrada |
+| INC-03 | Ordenamiento | Enviar ordenarPor=fe al buscador de ventas aceptaba un campo incompleto. | Alta | String.contains validaba subcadenas. | Set con coincidencia exacta, tamaño 1..100 y orden secundario por id. Backend d751c85. | Cerrada |
+| INC-04 | Migraciones | Solo existía V2 y Flyway no estaba integrado. | Alta | Esquema creado mediante Hibernate update. | Flyway con V1-V4, adopción del esquema histórico en dev y validate. Historial nuevo comprobado en Oracle. Backend bc077cb. | Cerrada |
+| INC-05 | Volumen | El script de la guía utiliza productos y la entidad real utiliza producto. | Media | Diferencia de nombres entre la guía y el esquema existente. | V4 y docs/sql/volumen_pruebas.sql usan PRODUCTO; carga separada en PHARMA_S14. Backend bc077cb. | Cerrada |
 
 Las incidencias se identificaron durante la inspección inicial y se registraron antes de aplicar sus correcciones. La medición inicial de Ventas conserva el contrato anterior de lista completa en las evidencias.
 
