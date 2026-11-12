@@ -3,6 +3,10 @@ package pe.edu.pe.PharmaBackend.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.pe.PharmaBackend.dto.ProductoRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.ProductoResponseDTO;
@@ -15,19 +19,27 @@ import pe.edu.pe.PharmaBackend.repository.ProductoRepository;
 import pe.edu.pe.PharmaBackend.service.service.ProductoService;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO;
 @Service
 public class ProductoServiceImpl implements ProductoService {
+    private final ApplicationEventPublisher eventos;
     private static final Logger LOG = LoggerFactory.getLogger(ProductoServiceImpl.class);
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository){
+    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository, ApplicationEventPublisher eventos){
+        this.eventos = eventos;
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
     }
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "productos", allEntries = true)
     public ProductoResponseDTO create(ProductoRequestDTO t) {
         String nombre = t.getNombre().trim();
         if (productoRepository.existsByNombreIgnoreCase(nombre)){
@@ -64,6 +76,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "productos", allEntries = true)
     public ProductoResponseDTO update(Long aLong, ProductoRequestDTO t) {
         Producto producto = productoRepository.findById(aLong).orElseThrow(()->
                 new RecursosNoEncontradoException(
@@ -71,6 +84,7 @@ public class ProductoServiceImpl implements ProductoService {
                 )
         );
 
+        java.math.BigDecimal precioAnterior = producto.getPrecio();
         String nombre = t.getNombre().trim();
         if (productoRepository.existsByNombreIgnoreCaseAndIdNot(nombre, aLong)) {
             throw new ReglaNegocioException(
@@ -93,12 +107,17 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setCategoria(categoria);
         producto.setFechaModificacion(LocalDateTime.now());
 
-        Producto prodActualizada = productoRepository.save(producto);
+        Producto prodActualizada = productoRepository.saveAndFlush(producto);
+        if (precioAnterior.compareTo(producto.getPrecio()) != 0) {
+            eventos.publishEvent(EventoAuditoria.de("PRECIO_MODIFICADO", "Producto", producto.getId(),
+                    precioAnterior + " -> " + producto.getPrecio()));
+        }
         return convertirResponse(prodActualizada);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "productos", key = "'id-' + #p0")
     public ProductoResponseDTO read(Long aLong) {
         Producto producto = productoRepository.findById(aLong)
                 .orElseThrow(()->
@@ -111,6 +130,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "productos", allEntries = true)
     public void delete(Long aLong) {
         Producto producto = productoRepository.findById(aLong).orElseThrow(()->
                 new RecursosNoEncontradoException(
@@ -124,15 +144,46 @@ public class ProductoServiceImpl implements ProductoService {
 
         producto.setEstado(false);
         productoRepository.save(producto);
+        eventos.publishEvent(EventoAuditoria.de("PRODUCTO_ELIMINADO", "Producto", producto.getId(), producto.getNombre()));
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "productos", key = "'todas'")
     public Iterable<ProductoResponseDTO> readAll() {
         return productoRepository.findAll()
                 .stream()
                 .map(this::convertirResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "productos", key = "#p0 + '-' + #p1 + '-' + #p2 + '-' + #p3 + '-cat-' + #p4")
+    public PaginaResponseDTO<ProductoResponseDTO> listar(int pagina, int tamanio,
+            String ordenarPor, String direccion, Long categoriaId) {
+        if (pagina < 0 || tamanio < 1 || tamanio > 100) {
+            throw new ReglaNegocioException("Página desde 0 y tamaño entre 1 y 100");
+        }
+        if (!Set.of("id", "nombre", "precio", "stock", "estado", "categoriaNombre").contains(ordenarPor)) {
+            throw new ReglaNegocioException("Campo de ordenamiento no permitido");
+        }
+        if (!"asc".equalsIgnoreCase(direccion) && !"desc".equalsIgnoreCase(direccion)) {
+            throw new ReglaNegocioException("La dirección debe ser asc o desc");
+        }
+        if (categoriaId != null && categoriaId < 1) {
+            throw new ReglaNegocioException("La categoría debe tener un identificador positivo");
+        }
+        String campo = "categoriaNombre".equals(ordenarPor) ? "categoria.nombre" : ordenarPor;
+        Sort sort = Sort.by(Sort.Direction.fromString(direccion), campo);
+        if (!"id".equals(campo)) sort = sort.and(Sort.by("id"));
+        PageRequest pageable = PageRequest.of(pagina, tamanio, sort);
+        Page<Producto> resultado = categoriaId == null
+                ? productoRepository.findAll(pageable)
+                : productoRepository.findByCategoriaId(categoriaId, pageable);
+        return new PaginaResponseDTO<>(resultado.getContent().stream().map(this::convertirResponse).toList(),
+                resultado.getNumber(), resultado.getSize(), resultado.getTotalElements(),
+                resultado.getTotalPages(), resultado.isLast());
     }
     private ProductoResponseDTO convertirResponse(Producto producto){
         return new ProductoResponseDTO(
@@ -145,7 +196,9 @@ public class ProductoServiceImpl implements ProductoService {
                 producto.getCategoria()!=null ? producto.getCategoria().getNombre() : null,
                 producto.getEstado(),
                 producto.getFechaCreacion(),
-                producto.getFechaModificacion()
+                producto.getFechaModificacion(),
+                producto.getCreadoPor(),
+                producto.getModificadoPor()
         );
     }
 }

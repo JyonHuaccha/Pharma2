@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class CategoriaResponseDTO {
+public class CategoriaResponseDTO implements Serializable {
+    private static final long serialVersionUID = 2L;
     private Long id;
     private String nombre;
     private String descripcion;
@@ -19,4 +21,6 @@ public class CategoriaResponseDTO {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;
 
+    private String creadoPor;
+    private String modificadoPor;
 }

@@ -46,6 +46,8 @@ public class SecurityConfig {
     private static final String[] RUTAS_PUBLICAS = {
             "/api/v1/auth/login",
             "/api/health",
+            "/actuator/health",
+            "/actuator/health/**",
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -68,6 +70,8 @@ public class SecurityConfig {
                 .sessionManagement(sesion ->
                         sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").hasAuthority(USUARIOS_ADMINISTRAR.name())
 // Publicas
 
                         .requestMatchers(RUTAS_PUBLICAS).permitAll()
@@ -100,7 +104,7 @@ public class SecurityConfig {
 // Administracion de la seguridad
                         .requestMatchers("/api/v1/usuarios/**",
 
-                                "/api/v1/empleados/**", "/api/v1/roles/**")
+                                "/api/v1/empleados/**", "/api/v1/roles/**", "/api/v1/auditoria/**")
                         .hasAuthority(USUARIOS_ADMINISTRAR.name())
 // Todo lo demas (auth/me, reportes...) exige un usuario
 // autenticado; los reportes ademas usan @PreAuthorize.

@@ -55,7 +55,7 @@ public class VentaController {
         );
     }
 
-    @GetMapping("/buscar")
+    @GetMapping(value = "/buscar", params = "!pagina")
     public ResponseEntity<List<VentaResponseDTO>> buscar(
 
             @RequestParam(required = false)
@@ -88,5 +88,19 @@ public class VentaController {
                         direccion
                 )
         );
+    }
+
+    @GetMapping(value = "/buscar", params = "pagina")
+    public ResponseEntity<pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO<VentaResponseDTO>> buscarPagina(
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) EstadoVenta estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "fecha") String ordenarPor,
+            @RequestParam(defaultValue = "desc") String direccion,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamanio) {
+        return ResponseEntity.ok(ventaService.buscarPagina(clienteId, estado, desde, hasta,
+                ordenarPor, direccion, pagina, tamanio));
     }
 }

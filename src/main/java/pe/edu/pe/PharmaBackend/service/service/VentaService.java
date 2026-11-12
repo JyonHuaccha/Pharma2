@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface VentaService {
+    pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO<VentaResponseDTO> buscarPagina(
+            Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta,
+            String ordenarPor, String direccion, int pagina, int tamanio);
     VentaResponseDTO registrar(VentaRequestDTO request);
     VentaResponseDTO buscar(Long id);
     List<VentaResponseDTO> listar();

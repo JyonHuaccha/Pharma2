@@ -3,6 +3,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.pe.PharmaBackend.dto.DetalleVentaRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.DetalleVentaResponseDTO;
@@ -28,18 +31,20 @@ import java.util.List;
 import java.util.HashSet;
 @Service
 public class VentaServiceImpl implements VentaService {
+    private final ApplicationEventPublisher eventos;
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
 
     private static final Logger log =
-            LoggerFactory.getLogger(ClienteServiceImpl.class);
+            LoggerFactory.getLogger(VentaServiceImpl.class);
 
     public VentaServiceImpl(
             VentaRepository ventaRepository,
             ClienteRepository clienteRepository,
-            ProductoRepository productoRepository) {
+            ProductoRepository productoRepository, ApplicationEventPublisher eventos) {
 
+        this.eventos = eventos;
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
@@ -47,7 +52,9 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "productos", allEntries = true)
     public VentaResponseDTO registrar(VentaRequestDTO request) {
+        log.info("Inicio registrar venta | lineas={}", request.getDetalles().size());
         var productosUnicos = new HashSet<Long>();
         for (DetalleVentaRequestDTO detalle : request.getDetalles()) {
             if (!productosUnicos.add(detalle.getProductoId())) {
@@ -100,8 +107,12 @@ public class VentaServiceImpl implements VentaService {
 
         venta.setTotal(total);
 
-        Venta guardada =ventaRepository.save(venta);
+        Venta guardada = ventaRepository.save(venta);
+        log.info("Venta preparada | ventaId={} | lineas={} | total={}",
+                guardada.getId(), request.getDetalles().size(), total);
 
+        eventos.publishEvent(EventoAuditoria.de("VENTA_REGISTRADA", "Venta", guardada.getId(),
+                "total=" + guardada.getTotal() + " | items=" + guardada.getDetalles().size()));
         return convertirResponse(guardada);
     }
 
@@ -121,6 +132,7 @@ public class VentaServiceImpl implements VentaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VentaResponseDTO> buscar(Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta, String ordenarPor, String direccion) {
         long inicio = System.currentTimeMillis();
 
@@ -167,40 +179,33 @@ public class VentaServiceImpl implements VentaService {
     }
 
 
-    private static final String ORDEN_POR_DEFECTO = "OrdenPorDefecto";
-    private static final String CAMPOS_ORDENABLES = "fecha,id,total,estado";
-
     private Sort construirSort(String ordenarPor, String direccion) {
-
-        String campo = (ordenarPor == null || ordenarPor.isBlank())
-                ? ORDEN_POR_DEFECTO
-                : ordenarPor.trim();
-
-        if (!CAMPOS_ORDENABLES.contains(campo)) {
-
-            throw new ReglaNegocioException(
-                    "El campo de ordenamiento '"
-                            + campo
-                            + "' no está permitido. Campos válidos: "
-                            + CAMPOS_ORDENABLES);
-        }
-
-        String sentido = (direccion == null || direccion.isBlank())
-                ? "desc"
-                : direccion.trim();
-
-        if (!sentido.equalsIgnoreCase("asc")
-                && !sentido.equalsIgnoreCase("desc")) {
-            throw new ReglaNegocioException(
-                    "La dirección de ordenamiento '"
-                            + sentido
-                            + "' no está permitida. Valores válidos: asc, desc");
-        }
-
-        return sentido.equalsIgnoreCase("asc")
-                ? Sort.by(campo).ascending()
-                : Sort.by(campo).descending();
+        return pe.edu.pe.PharmaBackend.util.PaginacionUtil.construir(0, 20, ordenarPor, direccion,
+                java.util.Set.of("fecha", "id", "total", "estado"), "fecha").getSort();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO<VentaResponseDTO> buscarPagina(
+            Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta,
+            String ordenarPor, String direccion, int pagina, int tamanio) {
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new ReglaNegocioException("La fecha desde no puede ser posterior a hasta");
+        }
+        if (clienteId != null && clienteId < 1) {
+            throw new ReglaNegocioException("El cliente debe tener un identificador positivo");
+        }
+        var pageable = pe.edu.pe.PharmaBackend.util.PaginacionUtil.construir(pagina, tamanio,
+                ordenarPor, direccion, java.util.Set.of("fecha", "id", "total", "estado"), "fecha");
+        var resultado = ventaRepository.buscarPagina(clienteId, estado,
+                desde == null ? null : desde.atStartOfDay(),
+                hasta == null ? null : hasta.plusDays(1).atStartOfDay(), pageable);
+        if (!resultado.isEmpty()) {
+            ventaRepository.cargarDetalles(resultado.getContent().stream().map(Venta::getId).toList());
+        }
+        return pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO.de(resultado.map(this::convertirResponse));
+    }
+
     private VentaResponseDTO convertirResponse(Venta venta) {
 
         List<DetalleVentaResponseDTO> detalles =
@@ -225,12 +230,8 @@ public class VentaServiceImpl implements VentaService {
                 clienteNombre,
                 venta.getEstado().name(),
                 venta.getTotal(),
-                detalles
+                detalles,
+                venta.getCreadoPor()
         );
-    }
-    private void ValidarFechas(
-            LocalDateTime desde,
-            LocalDateTime hasta){
-        if (desde != null && hasta != null);
     }
 }

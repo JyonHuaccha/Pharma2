@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 class BajaLogicaTest {
     @Test void productoRepetidoSeRechazaAntesDeDescontarStock() {
-        var servicio = new VentaServiceImpl(ventas, clientes, productos);
+        var servicio = new VentaServiceImpl(ventas, clientes, productos, mock(org.springframework.context.ApplicationEventPublisher.class));
         var request = new VentaRequestDTO(1L, List.of(new DetalleVentaRequestDTO(2L, 1), new DetalleVentaRequestDTO(2L, 2)));
         var error = assertThrows(ReglaNegocioException.class, () -> servicio.registrar(request));
         assertTrue(error.getMessage().contains("repetido"));
@@ -86,7 +86,7 @@ class BajaLogicaTest {
         Producto p = new Producto(); p.setId(2L); p.setEstado(true); p.setStock(5);
         when(productos.findById(2L)).thenReturn(Optional.of(p));
         when(productos.descontarStock(2L, 3)).thenReturn(0);
-        var servicio = new VentaServiceImpl(ventas, clientes, productos);
+        var servicio = new VentaServiceImpl(ventas, clientes, productos, mock(org.springframework.context.ApplicationEventPublisher.class));
         assertThrows(ReglaNegocioException.class, () -> servicio.registrar(
                 new VentaRequestDTO(1L, List.of(new DetalleVentaRequestDTO(2L, 3)))));
         verify(ventas, never()).save(any());
@@ -100,7 +100,7 @@ class BajaLogicaTest {
         when(ventas.save(any())).thenAnswer(inv -> {
             Venta v = inv.getArgument(0); v.setId(1L); return v;
         });
-        new VentaServiceImpl(ventas, clientes, productos).registrar(
+        new VentaServiceImpl(ventas, clientes, productos, mock(org.springframework.context.ApplicationEventPublisher.class)).registrar(
                 new VentaRequestDTO(1L, List.of(new DetalleVentaRequestDTO(2L, 3))));
         verify(productos).descontarStock(2L, 3);
         verify(ventas).save(argThat(v -> new BigDecimal("7.50").equals(v.getTotal())));
