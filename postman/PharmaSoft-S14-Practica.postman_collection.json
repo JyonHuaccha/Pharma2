@@ -1,0 +1,2998 @@
+{
+  "info": {
+    "_postman_id": "51b4c308-e96f-4fd0-a7b3-c188083a36db",
+    "name": "PharmaSoft — S14 Capturas y validaciones",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección preparada para ejecutar manualmente y tomar tus capturas de S14. No ejecuta ninguna petición al importarla.\n\nORDEN: 00 Login → 01 Mediciones → crea los datos en la SPA y usa 02 para recuperar IDs → 03 Venta/reportes → 04 Precio → 05 Seguridad → 06 Rollback → 07 Baja. La carpeta 08 requiere reiniciar temporalmente el backend para vencimiento. La carpeta 09 crea datos SOLO si aún no los registraste en la SPA.\n\nPara las mediciones de alto volumen, inicia el backend conectado a PHARMA_S14 según la guía del chat. Los tokens e identificadores se guardan automáticamente; empiezan vacíos en este archivo. Las variables usan prefijo s14 para evitar conflictos con tus otras colecciones. No necesitas importar un environment.\n\nSi registras la venta o cambias el precio desde Angular para las capturas, OMITE el POST/PUT equivalente de la colección. Usa las consultas de recuperación/verificación. No ejecutes toda la colección con Runner: contiene alternativas a acciones de la SPA y un caso de vencimiento que requiere espera real.\n\nI-01/I-02: capturas en Angular, con apoyo de 02. I-03/I-04: consultas antes y después. I-05: evento de venta. I-06: precio y autoría. I-07: vencimiento manual en la SPA; apoyo en 08. I-08: filtros desde la página 5 en Angular. Las siete pruebas E2E se ejecutan con Playwright, fuera de Postman.\n\nLas claves incluidas corresponden exclusivamente a las cuentas de clase ya configuradas. No se incluyen tokens reales, secretos JWT ni credenciales de Oracle."
+  },
+  "variable": [
+    {
+      "key": "s14BaseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "s14TokenAdmin",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14TokenVendedor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14TokenAlmacen",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14TokenVencimiento",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14Desde",
+      "value": "2026-11-01",
+      "type": "string"
+    },
+    {
+      "key": "s14Hasta",
+      "value": "2026-11-12",
+      "type": "string"
+    },
+    {
+      "key": "s14UltimaPagina",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14Categoria",
+      "value": "S14 Capturas",
+      "type": "string"
+    },
+    {
+      "key": "s14ApellidoCliente",
+      "value": "Capturas Huaccha",
+      "type": "string"
+    },
+    {
+      "key": "s14DniCliente",
+      "value": "87654321",
+      "type": "string"
+    },
+    {
+      "key": "s14Producto",
+      "value": "AAA Capturas Activo",
+      "type": "string"
+    },
+    {
+      "key": "s14ProductoInactivo",
+      "value": "AAA Capturas Inactivo",
+      "type": "string"
+    },
+    {
+      "key": "s14ProductoSinStock",
+      "value": "AAA Capturas Sin stock",
+      "type": "string"
+    },
+    {
+      "key": "s14IdCategoria",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14IdCliente",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14IdProducto",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14IdProductoInactivo",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14IdProductoSinStock",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14IdVenta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14RequestIdVenta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14RequestIdLoginFallido",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14RequestIdBaja",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14StockAntesVenta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14PrecioVenta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14CantidadVenta",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "s14ReporteCantidadAntes",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14ReporteTotalAntes",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14PrecioAnterior",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "s14PrecioNuevo",
+      "value": "13.75",
+      "type": "string"
+    },
+    {
+      "key": "s14ProductoEdicion",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14StockAntesRollback",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14EventosAntesRollback",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "s14UltimaMedicion",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 · Inicio de sesión — ejecutar primero",
+      "description": "",
+      "item": [
+        {
+          "name": "00.1 Login admin — guarda token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auth/login",
+            "description": "Envía esta petición para guardar el token en las variables de esta colección. Credenciales exclusivamente de las cuentas de clase.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Token emitido', () => pm.expect(r.token).to.be.a('string').and.not.empty);",
+                  "cv.set('s14TokenAdmin',r.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "00.2 Login vendedor — guarda token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auth/login",
+            "description": "Envía esta petición para guardar el token en las variables de esta colección. Credenciales exclusivamente de las cuentas de clase.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vendedor\",\n  \"password\": \"Vendedor2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Token emitido', () => pm.expect(r.token).to.be.a('string').and.not.empty);",
+                  "cv.set('s14TokenVendedor',r.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "00.3 Login almacen — guarda token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auth/login",
+            "description": "Envía esta petición para guardar el token en las variables de esta colección. Credenciales exclusivamente de las cuentas de clase.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"almacen\",\n  \"password\": \"Almacen2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Token emitido', () => pm.expect(r.token).to.be.a('string').and.not.empty);",
+                  "cv.set('s14TokenAlmacen',r.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 · Paginación y mediciones",
+      "description": "",
+      "item": [
+        {
+          "name": "01.1 Productos — página 0 / 20 filas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=20",
+            "description": "Captura URL, HTTP, tiempo y tamaño. Al final del JSON están los totales. Calcula y guarda la última página automáticamente."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "pm.test('Página 0, tamaño 20',()=>{pm.expect(r.pagina).to.eql(0);pm.expect(r.tamanio).to.eql(20);});",
+                  "cv.set('s14UltimaPagina',Math.max(0,r.totalPaginas-1));",
+                  "}",
+                  "",
+                  "const medicion = { fecha: new Date().toISOString(), peticion: pm.info.requestName,",
+                  "  http: pm.response.code, ms: pm.response.responseTime,",
+                  "  bytesCuerpoUtf8: encodeURIComponent(pm.response.text()).replace(/%[0-9A-F]{2}/g,'x').length,",
+                  "  requestId: pm.response.headers.get('X-Request-Id') };",
+                  "cv.set('s14UltimaMedicion', JSON.stringify(medicion, null, 2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.2 Productos — tamaño máximo 100",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=100",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "pm.test('Tamaño 100',()=>pm.expect(r.tamanio).to.eql(100));",
+                  "}",
+                  "",
+                  "const medicion = { fecha: new Date().toISOString(), peticion: pm.info.requestName,",
+                  "  http: pm.response.code, ms: pm.response.responseTime,",
+                  "  bytesCuerpoUtf8: encodeURIComponent(pm.response.text()).replace(/%[0-9A-F]{2}/g,'x').length,",
+                  "  requestId: pm.response.headers.get('X-Request-Id') };",
+                  "cv.set('s14UltimaMedicion', JSON.stringify(medicion, null, 2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.3 Productos — última página real",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina={{s14UltimaPagina}}&tamanio=20",
+            "description": "Ejecuta antes 01.1. Se usa totalPaginas-1; no se supone que la página 249 sea la última."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14UltimaPagina\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "pm.test('Es la última página',()=>pm.expect(r.ultima).to.eql(true));",
+                  "}",
+                  "",
+                  "const medicion = { fecha: new Date().toISOString(), peticion: pm.info.requestName,",
+                  "  http: pm.response.code, ms: pm.response.responseTime,",
+                  "  bytesCuerpoUtf8: encodeURIComponent(pm.response.text()).replace(/%[0-9A-F]{2}/g,'x').length,",
+                  "  requestId: pm.response.headers.get('X-Request-Id') };",
+                  "cv.set('s14UltimaMedicion', JSON.stringify(medicion, null, 2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.4 Productos — tamaño 500 rechazado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=500",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}",
+                  "",
+                  "const medicion = { fecha: new Date().toISOString(), peticion: pm.info.requestName,",
+                  "  http: pm.response.code, ms: pm.response.responseTime,",
+                  "  bytesCuerpoUtf8: encodeURIComponent(pm.response.text()).replace(/%[0-9A-F]{2}/g,'x').length,",
+                  "  requestId: pm.response.headers.get('X-Request-Id') };",
+                  "cv.set('s14UltimaMedicion', JSON.stringify(medicion, null, 2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.5 Productos — orden desconocido rechazado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=20&ordenarPor=desconocido",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.6 Ventas — rango y página del servidor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas/buscar?desde={{s14Desde}}&hasta={{s14Hasta}}&pagina=0&tamanio=20",
+            "description": "Rango de la guía. Puedes editar s14Desde/s14Hasta en Variables. La respuesta debe ser un objeto de página, no una lista completa."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "}",
+                  "",
+                  "const medicion = { fecha: new Date().toISOString(), peticion: pm.info.requestName,",
+                  "  http: pm.response.code, ms: pm.response.responseTime,",
+                  "  bytesCuerpoUtf8: encodeURIComponent(pm.response.text()).replace(/%[0-9A-F]{2}/g,'x').length,",
+                  "  requestId: pm.response.headers.get('X-Request-Id') };",
+                  "cv.set('s14UltimaMedicion', JSON.stringify(medicion, null, 2));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.7 Ventas — orden parcial fe rechazado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas/buscar?pagina=0&ordenarPor=fe",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.8 Ventas — página negativa rechazada",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas/buscar?pagina=-1",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.9 Ventas — tamaño 500 rechazado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas/buscar?pagina=0&tamanio=500",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 · Localizar datos creados en la SPA — guarda IDs",
+      "description": "",
+      "item": [
+        {
+          "name": "02.1 Encontrar categoría S14 Capturas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/categorias",
+            "description": "Consulta únicamente. Busca por nombre y guarda el ID de categoría. No crea registros."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "const categoria=r.find(x=>x.nombre.trim().toLowerCase()===cv.get('s14Categoria').trim().toLowerCase());",
+                  "pm.test('Categoría de capturas existente y activa',()=>{pm.expect(categoria,'Crea S14 Capturas en la SPA o usa la carpeta opcional').to.exist;pm.expect(categoria.estado).to.eql(true);});",
+                  "if(categoria) cv.set('s14IdCategoria',categoria.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "02.2 Encontrar cliente Capturas Huaccha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/clientes",
+            "description": "Ejecuta después de registrar el cliente en la SPA para I-01. Guarda su ID automáticamente."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "const cliente=r.find(x=>x.apellidos.trim().toLowerCase()===cv.get('s14ApellidoCliente').trim().toLowerCase() && x.estado);",
+                  "pm.test('Cliente de capturas activo',()=>pm.expect(cliente,'Registra primero el cliente de I-01 en la SPA o carpeta opcional').to.exist);",
+                  "if(cliente) cv.set('s14IdCliente',cliente.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "02.3 Encontrar los tres productos de la categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=20&categoriaId={{s14IdCategoria}}",
+            "description": "Ejecuta después de crear los tres productos de la guía. Filtra por categoría para evitar descargar todo el catálogo."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdCategoria\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "for(const [nombre,id] of [['s14Producto','s14IdProducto'],['s14ProductoInactivo','s14IdProductoInactivo'],['s14ProductoSinStock','s14IdProductoSinStock']]) {",
+                  " const producto=r.contenido.find(p=>p.nombre===cv.get(nombre));",
+                  " pm.test('Existe '+cv.get(nombre),()=>pm.expect(producto,'Registra el producto indicado en la SPA o carpeta opcional').to.exist);",
+                  " if(producto) cv.set(id,producto.id);",
+                  "}",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 · I-03, I-04 e I-05 — venta, stock, reporte y auditoría",
+      "description": "",
+      "item": [
+        {
+          "name": "I-03.1 Stock y precio ANTES de vender",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": "Envía ANTES de registrar la venta en la SPA o en I-03.2. Guarda la referencia de stock y precio para las comprobaciones posteriores."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\", \"s14IdProducto\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "pm.test('Producto disponible para dos unidades',()=>{pm.expect(r.estado).to.eql(true);pm.expect(r.stock).to.be.at.least(2);});",
+                  "cv.set('s14StockAntesVenta',r.stock);cv.set('s14PrecioVenta',r.precio);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-04.1 Reporte ANTES de la venta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/reportes/productos-mas-vendidos",
+            "description": "Envía ANTES de vender. El producto sin ventas puede no aparecer: se guarda cantidad=0 y total=0."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "const producto=r.find(p=>Number(p.id)===Number(cv.get('s14IdProducto')));",
+                  "cv.set('s14ReporteCantidadAntes',producto?producto.cantidad:0);cv.set('s14ReporteTotalAntes',producto?producto.total:0);",
+                  "pm.test('Reporte recibido',()=>pm.expect(r).to.be.an('array'));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-03.2 Registrar venta de dos unidades — SOLO si la harás por Postman",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas",
+            "description": "Esta petición REGISTRA una venta real. Para capturar I-03 en el frontend, registra allí y OMITE este POST; usa I-03.3 para recuperar su ID. Enviar ambos registraría dos ventas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{s14IdCliente}},\n  \"detalles\": [{ \"productoId\": {{s14IdProducto}}, \"cantidad\": 2 }]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\", \"s14IdCliente\", \"s14IdProducto\", \"s14PrecioVenta\", \"s14StockAntesVenta\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "cv.set('s14IdVenta',r.id);cv.set('s14RequestIdVenta',pm.response.headers.get('X-Request-Id'));",
+                  "pm.test('Usuario vendedor y detalle de dos unidades',()=>{pm.expect(r.creadoPor).to.eql('vendedor');pm.expect(r.detalles).to.have.lengthOf(1);pm.expect(r.detalles[0].cantidad).to.eql(2);});",
+                  "pm.test('Importe calculado con precio vigente',()=>pm.expect(Number(r.total)).to.be.closeTo(Number(cv.get('s14PrecioVenta'))*2,0.001));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-03.3 Recuperar la venta que registraste en la SPA",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas/buscar?clienteId={{s14IdCliente}}&pagina=0&tamanio=20&ordenarPor=fecha&direccion=desc",
+            "description": "Envía si registraste la venta en Angular. Guarda el ID de la venta más reciente de ese producto y cliente. Para comparar X-Request-Id con la SPA, copia el encabezado del POST de Network a s14RequestIdVenta en Variables."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\", \"s14IdCliente\", \"s14IdProducto\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "const venta=r.contenido.find(v=>v.detalles.some(d=>Number(d.productoId)===Number(cv.get('s14IdProducto'))));",
+                  "pm.test('Venta del cliente y producto encontrados',()=>pm.expect(venta).to.exist);",
+                  "if(venta) {",
+                  " if(String(cv.get('s14IdVenta'))!==String(venta.id)) cv.set('s14RequestIdVenta','');",
+                  " cv.set('s14IdVenta',venta.id);",
+                  "}",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-03.4 Stock DESPUÉS de vender",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": "Complementa la captura en Productos sin F5. Compara con I-03.1; no vuelvas a ejecutar la captura de stock ANTES entre ambas."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\", \"s14IdProducto\", \"s14StockAntesVenta\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "pm.test('El stock disminuyó exactamente dos unidades',()=>pm.expect(r.stock).to.eql(Number(cv.get('s14StockAntesVenta'))-2));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-04.2 Reporte DESPUÉS de la venta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/reportes/productos-mas-vendidos",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\", \"s14ReporteCantidadAntes\", \"s14ReporteTotalAntes\", \"s14PrecioVenta\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "const producto=r.find(p=>Number(p.id)===Number(cv.get('s14IdProducto')));",
+                  "pm.test('Reporte incrementado en dos unidades',()=>{pm.expect(producto).to.exist;pm.expect(producto.cantidad).to.eql(Number(cv.get('s14ReporteCantidadAntes'))+2);});",
+                  "pm.test('Importe incrementado por la venta',()=>pm.expect(Number(producto.total)).to.be.closeTo(Number(cv.get('s14ReporteTotalAntes'))+Number(cv.get('s14PrecioVenta'))*2,0.001));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-05 Evento de la venta y requestId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=100",
+            "description": "Busca el evento por ID de venta. La prueba de igualdad con el encabezado HTTP se ejecuta cuando s14RequestIdVenta tiene el valor del POST (guardado automáticamente al registrar aquí o copiado desde Network si registraste en la SPA)."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdVenta\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "const evento=r.contenido.find(e=>Number(e.entidadId)===Number(cv.get('s14IdVenta')));",
+                  "pm.test('Evento con la venta y usuario correctos',()=>{pm.expect(evento).to.exist;pm.expect(evento.usuario).to.eql('vendedor');pm.expect(evento.accion).to.eql('VENTA_REGISTRADA');});",
+                  "pm.test('requestId presente',()=>pm.expect(evento.requestId).to.be.a('string').and.not.empty);",
+                  "if(cv.get('s14RequestIdVenta')) pm.test('requestId idéntico al POST de la venta',()=>pm.expect(evento.requestId).to.eql(cv.get('s14RequestIdVenta')));",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 · I-06 — precio y autoría",
+      "description": "",
+      "item": [
+        {
+          "name": "I-06.1 Consultar producto ANTES de cambiar precio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": "Envía ANTES de cambiar el precio en la SPA o Postman. Guarda los datos actuales para que el PUT mantenga stock, categoría, nombre y estado."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "cv.set('s14PrecioAnterior',r.precio);",
+                  "cv.set('s14ProductoEdicion',JSON.stringify({id:r.id,nombre:r.nombre,descripcion:r.descripcion,precio:r.precio,stock:r.stock,categoriaId:r.categoriaId,estado:r.estado}));",
+                  "pm.test('Autoría expuesta',()=>{pm.expect(r).to.have.property('creadoPor');pm.expect(r).to.have.property('modificadoPor');});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-06.2 Cambiar únicamente precio — SOLO si no lo cambiaste en la SPA",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": "MODIFICA el precio con los datos leídos en I-06.1. Si lo cambiaste en Angular, omite este PUT y continúa con I-06.3.",
+            "body": {
+              "mode": "raw",
+              "raw": "{{s14CuerpoCambioPrecio}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\", \"s14ProductoEdicion\", \"s14PrecioNuevo\"]);",
+                  "",
+                  "const producto=JSON.parse(cv.get('s14ProductoEdicion'));",
+                  "if(Number(producto.id)!==Number(cv.get('s14IdProducto'))) throw new Error('Vuelve a consultar I-06.1 para este producto.');",
+                  "if(Number(producto.precio)===Number(cv.get('s14PrecioNuevo'))) throw new Error('El precio ya es el nuevo. Consulta el evento o elige un precio distinto antes de modificar.');",
+                  "delete producto.id;producto.precio=Number(cv.get('s14PrecioNuevo'));pm.variables.set('s14CuerpoCambioPrecio',JSON.stringify(producto));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "pm.test('Precio nuevo y autor admin',()=>{pm.expect(Number(r.precio)).to.eql(Number(cv.get('s14PrecioNuevo')));pm.expect(r.modificadoPor).to.eql('admin');});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-06.3 Consultar precio nuevo y modificadoPor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\", \"s14PrecioNuevo\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "",
+                  "pm.test('Precio actualizado y usuario admin',()=>{pm.expect(Number(r.precio)).to.eql(Number(cv.get('s14PrecioNuevo')));pm.expect(r.modificadoPor).to.eql('admin');});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-06.4 Evento PRECIO_MODIFICADO",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=admin&accion=PRECIO_MODIFICADO&pagina=0&tamanio=100",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\", \"s14PrecioAnterior\", \"s14PrecioNuevo\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "const evento=r.contenido.find(e=>Number(e.entidadId)===Number(cv.get('s14IdProducto')));",
+                  "pm.test('Evento del producto, anterior y nuevo',()=>{pm.expect(evento).to.exist;pm.expect(evento.usuario).to.eql('admin');pm.expect(evento.detalle).to.contain(String(cv.get('s14PrecioAnterior')));pm.expect(evento.detalle).to.contain(String(cv.get('s14PrecioNuevo')));});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 · Seguridad de auditoría y login fallido",
+      "description": "",
+      "item": [
+        {
+          "name": "A-01.1 ADMIN consulta bitácora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?pagina=0&tamanio=20",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-01.2 VENDEDOR no puede consultar bitácora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?pagina=0&tamanio=20",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));",
+                  "if (pm.response.code === 403) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-01.3 Bitácora rechaza tamaño 500",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?pagina=0&tamanio=500",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-02.1 Login incorrecto — conserva requestId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auth/login",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "if (pm.response.code === 401) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "cv.set('s14RequestIdLoginFallido',pm.response.headers.get('X-Request-Id'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-02.2 Evento del login fallido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=admin&accion=LOGIN_FALLIDO&pagina=0&tamanio=100",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14RequestIdLoginFallido\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "const evento=r.contenido.find(e=>e.requestId===cv.get('s14RequestIdLoginFallido'));",
+                  "pm.test('Login fallido auditado con el mismo requestId',()=>{pm.expect(evento).to.exist;pm.expect(evento.usuario).to.eql('admin');pm.expect(evento.accion).to.eql('LOGIN_FALLIDO');});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 · Rollback — antes de la baja lógica",
+      "description": "",
+      "item": [
+        {
+          "name": "A-03.1 Stock ANTES de venta fallida",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14StockAntesRollback',r.stock);pm.test('Stock para la primera línea',()=>pm.expect(r.stock).to.be.at.least(2));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-03.2 Contar eventos ANTES de venta fallida",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=1",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "cv.set('s14EventosAntesRollback',r.totalElementos);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-03.3 Venta con segunda línea sin stock — espera 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/ventas",
+            "description": "El segundo producto debe seguir ACTIVO con stock 0. Ejecuta antes de darlo de baja. No registres otras ventas mientras comparas conteos.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{s14IdCliente}},\n  \"detalles\": [\n    { \"productoId\": {{s14IdProducto}}, \"cantidad\": 2 },\n    { \"productoId\": {{s14IdProductoSinStock}}, \"cantidad\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVendedor\", \"s14IdCliente\", \"s14IdProducto\", \"s14IdProductoSinStock\", \"s14StockAntesRollback\", \"s14EventosAntesRollback\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "if (pm.response.code === 409) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "pm.test('Mensaje de stock insuficiente',()=>pm.expect(r.message.toLowerCase()).to.contain('stock'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-03.4 Stock intacto DESPUÉS del rollback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProducto}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProducto\", \"s14StockAntesRollback\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Primera línea revertida: stock sin cambios',()=>pm.expect(r.stock).to.eql(Number(cv.get('s14StockAntesRollback'))));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-03.5 No existe evento falso de venta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=1",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14EventosAntesRollback\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "pm.test('Cantidad de eventos sin cambios',()=>pm.expect(r.totalElementos).to.eql(Number(cv.get('s14EventosAntesRollback'))));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 · Baja lógica y evento",
+      "description": "",
+      "item": [
+        {
+          "name": "A-04.1 Dar de baja producto sin stock — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProductoSinStock}}",
+            "description": "DA DE BAJA el producto sin stock: permanece en la base con estado=false. Ejecuta después del caso A-03."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProductoSinStock\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14RequestIdBaja',pm.response.headers.get('X-Request-Id'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-04.2 Producto permanece inactivo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos/{{s14IdProductoSinStock}}",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProductoSinStock\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Baja lógica, no borrado físico',()=>{pm.expect(Number(r.id)).to.eql(Number(cv.get('s14IdProductoSinStock')));pm.expect(r.estado).to.eql(false);});",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "A-04.3 Evento PRODUCTO_ELIMINADO",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auditoria?usuario=admin&accion=PRODUCTO_ELIMINADO&pagina=0&tamanio=100",
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdProductoSinStock\", \"s14RequestIdBaja\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Contrato de página del servidor', () => {",
+                  "  pm.expect(r.contenido).to.be.an('array');",
+                  "  pm.expect(r.pagina).to.be.a('number'); pm.expect(r.totalPaginas).to.be.a('number');",
+                  "  pm.expect(r.contenido.length).to.be.at.most(r.tamanio);",
+                  "  pm.expect(r.totalElementos).to.be.at.least(r.contenido.length);",
+                  "});",
+                  "const evento=r.contenido.find(e=>Number(e.entidadId)===Number(cv.get('s14IdProductoSinStock')) && e.requestId===cv.get('s14RequestIdBaja'));",
+                  "pm.test('Evento de baja correlacionado',()=>{pm.expect(evento).to.exist;pm.expect(evento.usuario).to.eql('admin');});",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 · I-07 — vencimiento manual, requiere reinicio",
+      "description": "",
+      "item": [
+        {
+          "name": "I-07.1 Login para vencimiento — token separado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{s14BaseUrl}}/api/v1/auth/login",
+            "description": "Caso manual I-07: primero reinicia el backend con APP_JWT_EXPIRACION_MINUTOS=1. Este token se guarda separado para conservarlo al renovar los otros.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vendedor\",\n  \"password\": \"Vendedor2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14TokenVencimiento',r.token);pm.test('Duración de prueba de un minuto',()=>pm.expect(r.expiraEnSegundos).to.eql(60));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "I-07.2 Token vencido rechazado — espera 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenVencimiento}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos?pagina=0&tamanio=20",
+            "description": "Espera a que transcurra el minuto desde I-07.1. Para la evidencia de redirección debes realizar también el caso en Angular. Al terminar restaura 60 minutos y renueva los tokens."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenVencimiento\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "if (pm.response.code === 401) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "pm.test('Error con mensaje', () => pm.expect(r.message).to.be.a('string').and.not.empty);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 · OPCIONAL — crear datos si no los creaste en la SPA",
+      "description": "",
+      "item": [
+        {
+          "name": "OP.1 Crear categoría S14 Capturas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/categorias",
+            "description": "OPCIONAL. Crea un registro. Úsalo solo si no creaste esta categoría en la SPA.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{s14Categoria}}\",\n  \"descripcion\": \"Pruebas de integración S14\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14IdCategoria',r.id);pm.test('Creada por admin',()=>pm.expect(r.creadoPor).to.eql('admin'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "OP.2 Crear cliente Capturas Huaccha",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/clientes",
+            "description": "OPCIONAL. Crea el cliente si no lo registraste en la SPA. Si el DNI ya existe, ajusta s14DniCliente. Para I-01 comprueba después que aparece en el buscador de Nueva venta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"{{s14DniCliente}}\",\n  \"nombres\": \"Cliente S14\",\n  \"apellidos\": \"{{s14ApellidoCliente}}\",\n  \"email\": \"capturas.s14@example.test\",\n  \"telefono\": \"900111222\",\n  \"direccion\": \"Prueba de integración S14\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14IdCliente',r.id);pm.test('Creado por admin',()=>pm.expect(r.creadoPor).to.eql('admin'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "OP.3 Crear producto Activo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos",
+            "description": "OPCIONAL. Crea este producto únicamente si no lo registraste en la SPA. Guarda automáticamente su ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{s14Producto}}\",\n  \"descripcion\": \"Prueba de integración S14\",\n  \"precio\": 10,\n  \"stock\": 20,\n  \"categoriaId\": {{s14IdCategoria}},\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdCategoria\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14IdProducto',r.id);pm.test('Creado por admin',()=>pm.expect(r.creadoPor).to.eql('admin'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "OP.4 Crear producto Inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos",
+            "description": "OPCIONAL. Crea este producto únicamente si no lo registraste en la SPA. Guarda automáticamente su ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{s14ProductoInactivo}}\",\n  \"descripcion\": \"Prueba de integración S14\",\n  \"precio\": 10,\n  \"stock\": 20,\n  \"categoriaId\": {{s14IdCategoria}},\n  \"estado\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdCategoria\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14IdProductoInactivo',r.id);pm.test('Creado por admin',()=>pm.expect(r.creadoPor).to.eql('admin'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "OP.5 Crear producto Sin stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{s14TokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{s14BaseUrl}}/api/v1/productos",
+            "description": "OPCIONAL. Crea este producto únicamente si no lo registraste en la SPA. Guarda automáticamente su ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{s14ProductoSinStock}}\",\n  \"descripcion\": \"Prueba de integración S14\",\n  \"precio\": 10,\n  \"stock\": 0,\n  \"categoriaId\": {{s14IdCategoria}},\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "function requerir(claves) {",
+                  "  for (const clave of claves) {",
+                  "    if (cv.get(clave) === undefined || cv.get(clave) === null || String(cv.get(clave)).trim() === '') {",
+                  "      throw new Error('Falta '+clave+'. Ejecuta primero el login o la preparación indicados en la descripción.');",
+                  "    }",
+                  "  }",
+                  "}",
+                  "requerir([\"s14TokenAdmin\", \"s14IdCategoria\"]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cv = pm.collectionVariables;",
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "const r = pm.response.code === 204 ? null : pm.response.json();",
+                  "cv.set('s14IdProductoSinStock',r.id);pm.test('Creado por admin',()=>pm.expect(r.creadoPor).to.eql('admin'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}
