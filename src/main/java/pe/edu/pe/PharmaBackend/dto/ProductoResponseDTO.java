@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ProductoResponseDTO implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     private Long id;
     private String nombre;
     private String descripcion;
@@ -26,4 +26,6 @@ public class ProductoResponseDTO implements Serializable {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;
 
+    private String creadoPor;
+    private String modificadoPor;
 }

@@ -21,7 +21,7 @@ class CambioPasswordTest {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(4);
     private final AuthServiceImpl servicio = new AuthServiceImpl(
             mock(AuthenticationManager.class), mock(JwtService.class), usuarios,
-            new UsuarioMapper(), encoder);
+            new UsuarioMapper(), encoder, mock(pe.edu.pe.PharmaBackend.service.service.AuditoriaService.class));
 
     private Usuario vendedor() {
         Usuario usuario = new Usuario();

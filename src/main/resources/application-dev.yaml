@@ -5,10 +5,15 @@ spring:
     url: jdbc:oracle:thin:@//localhost:1522/FREEPDB1
     username: PHARMADB
     password: oracle123
+  flyway:
+    # El esquema histórico ya contiene las tablas equivalentes a V1-V3.
+    # Un esquema vacío ejecuta V1, V2, V3 y V4 normalmente.
+    baseline-on-migrate: true
+    baseline-version: 3
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
 
     properties:

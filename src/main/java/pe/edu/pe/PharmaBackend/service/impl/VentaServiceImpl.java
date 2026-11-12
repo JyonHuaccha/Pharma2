@@ -3,6 +3,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.pe.PharmaBackend.dto.DetalleVentaRequestDTO;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.HashSet;
 @Service
 public class VentaServiceImpl implements VentaService {
+    private final ApplicationEventPublisher eventos;
     private final VentaRepository ventaRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
@@ -39,8 +42,9 @@ public class VentaServiceImpl implements VentaService {
     public VentaServiceImpl(
             VentaRepository ventaRepository,
             ClienteRepository clienteRepository,
-            ProductoRepository productoRepository) {
+            ProductoRepository productoRepository, ApplicationEventPublisher eventos) {
 
+        this.eventos = eventos;
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
@@ -107,6 +111,8 @@ public class VentaServiceImpl implements VentaService {
         log.info("Venta preparada | ventaId={} | lineas={} | total={}",
                 guardada.getId(), request.getDetalles().size(), total);
 
+        eventos.publishEvent(EventoAuditoria.de("VENTA_REGISTRADA", "Venta", guardada.getId(),
+                "total=" + guardada.getTotal() + " | items=" + guardada.getDetalles().size()));
         return convertirResponse(guardada);
     }
 
@@ -230,7 +236,8 @@ public class VentaServiceImpl implements VentaService {
                 clienteNombre,
                 venta.getEstado().name(),
                 venta.getTotal(),
-                detalles
+                detalles,
+                venta.getCreadoPor()
         );
     }
     private void ValidarFechas(

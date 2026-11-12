@@ -20,4 +20,9 @@ public class PaginaResponseDTO<T> implements Serializable {
     private long totalElementos;
     private int totalPaginas;
     private boolean ultima;
+
+    public static <T> PaginaResponseDTO<T> de(org.springframework.data.domain.Page<T> pagina) {
+        return new PaginaResponseDTO<>(pagina.getContent(), pagina.getNumber(), pagina.getSize(),
+                pagina.getTotalElements(), pagina.getTotalPages(), pagina.isLast());
+    }
 }

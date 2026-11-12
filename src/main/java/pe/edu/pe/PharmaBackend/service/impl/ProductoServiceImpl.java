@@ -3,6 +3,8 @@ package pe.edu.pe.PharmaBackend.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +26,13 @@ import org.springframework.data.domain.Sort;
 import pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO;
 @Service
 public class ProductoServiceImpl implements ProductoService {
+    private final ApplicationEventPublisher eventos;
     private static final Logger LOG = LoggerFactory.getLogger(ProductoServiceImpl.class);
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository){
+    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository, ApplicationEventPublisher eventos){
+        this.eventos = eventos;
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
     }
@@ -80,6 +84,7 @@ public class ProductoServiceImpl implements ProductoService {
                 )
         );
 
+        java.math.BigDecimal precioAnterior = producto.getPrecio();
         String nombre = t.getNombre().trim();
         if (productoRepository.existsByNombreIgnoreCaseAndIdNot(nombre, aLong)) {
             throw new ReglaNegocioException(
@@ -102,7 +107,11 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setCategoria(categoria);
         producto.setFechaModificacion(LocalDateTime.now());
 
-        Producto prodActualizada = productoRepository.save(producto);
+        Producto prodActualizada = productoRepository.saveAndFlush(producto);
+        if (precioAnterior.compareTo(producto.getPrecio()) != 0) {
+            eventos.publishEvent(EventoAuditoria.de("PRECIO_MODIFICADO", "Producto", producto.getId(),
+                    precioAnterior + " -> " + producto.getPrecio()));
+        }
         return convertirResponse(prodActualizada);
     }
 
@@ -135,6 +144,7 @@ public class ProductoServiceImpl implements ProductoService {
 
         producto.setEstado(false);
         productoRepository.save(producto);
+        eventos.publishEvent(EventoAuditoria.de("PRODUCTO_ELIMINADO", "Producto", producto.getId(), producto.getNombre()));
     }
 
     @Override
@@ -186,7 +196,9 @@ public class ProductoServiceImpl implements ProductoService {
                 producto.getCategoria()!=null ? producto.getCategoria().getNombre() : null,
                 producto.getEstado(),
                 producto.getFechaCreacion(),
-                producto.getFechaModificacion()
+                producto.getFechaModificacion(),
+                producto.getCreadoPor(),
+                producto.getModificadoPor()
         );
     }
 }
