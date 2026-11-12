@@ -14,6 +14,30 @@ import java.util.List;
 public interface VentaRepository extends JpaRepository<Venta, Long> {
     boolean existsByClienteId(Long clienteId);
 
+    // Se pagina la cabecera sin fetch de colecciones para que Oracle aplique OFFSET/FETCH.
+    @Query(value = """
+            select v from Venta v join fetch v.cliente c
+            where (:clienteId is null or c.id = :clienteId)
+              and (:estado is null or v.estado = :estado)
+              and (:desde is null or v.fecha >= :desde)
+              and (:hasta is null or v.fecha < :hasta)
+            """, countQuery = """
+            select count(v) from Venta v
+            where (:clienteId is null or v.cliente.id = :clienteId)
+              and (:estado is null or v.estado = :estado)
+              and (:desde is null or v.fecha >= :desde)
+              and (:hasta is null or v.fecha < :hasta)
+            """)
+    org.springframework.data.domain.Page<Venta> buscarPagina(
+            @Param("clienteId") Long clienteId, @Param("estado") EstadoVenta estado,
+            @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta,
+            org.springframework.data.domain.Pageable pageable);
+
+    // Los detalles se cargan solo para los identificadores de la página, en una consulta adicional.
+    @Query("select distinct v from Venta v left join fetch v.detalles d left join fetch d.producto where v.id in :ids")
+    List<Venta> cargarDetalles(@Param("ids") List<Long> ids);
+
+
 @Query("""
     select distinct v
     from Venta v

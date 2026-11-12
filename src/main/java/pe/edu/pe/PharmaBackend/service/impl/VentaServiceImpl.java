@@ -132,6 +132,7 @@ public class VentaServiceImpl implements VentaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VentaResponseDTO> buscar(Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta, String ordenarPor, String direccion) {
         long inicio = System.currentTimeMillis();
 
@@ -178,40 +179,33 @@ public class VentaServiceImpl implements VentaService {
     }
 
 
-    private static final String ORDEN_POR_DEFECTO = "OrdenPorDefecto";
-    private static final String CAMPOS_ORDENABLES = "fecha,id,total,estado";
-
     private Sort construirSort(String ordenarPor, String direccion) {
-
-        String campo = (ordenarPor == null || ordenarPor.isBlank())
-                ? ORDEN_POR_DEFECTO
-                : ordenarPor.trim();
-
-        if (!CAMPOS_ORDENABLES.contains(campo)) {
-
-            throw new ReglaNegocioException(
-                    "El campo de ordenamiento '"
-                            + campo
-                            + "' no está permitido. Campos válidos: "
-                            + CAMPOS_ORDENABLES);
-        }
-
-        String sentido = (direccion == null || direccion.isBlank())
-                ? "desc"
-                : direccion.trim();
-
-        if (!sentido.equalsIgnoreCase("asc")
-                && !sentido.equalsIgnoreCase("desc")) {
-            throw new ReglaNegocioException(
-                    "La dirección de ordenamiento '"
-                            + sentido
-                            + "' no está permitida. Valores válidos: asc, desc");
-        }
-
-        return sentido.equalsIgnoreCase("asc")
-                ? Sort.by(campo).ascending()
-                : Sort.by(campo).descending();
+        return pe.edu.pe.PharmaBackend.util.PaginacionUtil.construir(0, 20, ordenarPor, direccion,
+                java.util.Set.of("fecha", "id", "total", "estado"), "fecha").getSort();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO<VentaResponseDTO> buscarPagina(
+            Long clienteId, EstadoVenta estado, LocalDate desde, LocalDate hasta,
+            String ordenarPor, String direccion, int pagina, int tamanio) {
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new ReglaNegocioException("La fecha desde no puede ser posterior a hasta");
+        }
+        if (clienteId != null && clienteId < 1) {
+            throw new ReglaNegocioException("El cliente debe tener un identificador positivo");
+        }
+        var pageable = pe.edu.pe.PharmaBackend.util.PaginacionUtil.construir(pagina, tamanio,
+                ordenarPor, direccion, java.util.Set.of("fecha", "id", "total", "estado"), "fecha");
+        var resultado = ventaRepository.buscarPagina(clienteId, estado,
+                desde == null ? null : desde.atStartOfDay(),
+                hasta == null ? null : hasta.plusDays(1).atStartOfDay(), pageable);
+        if (!resultado.isEmpty()) {
+            ventaRepository.cargarDetalles(resultado.getContent().stream().map(Venta::getId).toList());
+        }
+        return pe.edu.pe.PharmaBackend.dto.PaginaResponseDTO.de(resultado.map(this::convertirResponse));
+    }
+
     private VentaResponseDTO convertirResponse(Venta venta) {
 
         List<DetalleVentaResponseDTO> detalles =
@@ -239,10 +233,5 @@ public class VentaServiceImpl implements VentaService {
                 detalles,
                 venta.getCreadoPor()
         );
-    }
-    private void ValidarFechas(
-            LocalDateTime desde,
-            LocalDateTime hasta){
-        if (desde != null && hasta != null);
     }
 }
