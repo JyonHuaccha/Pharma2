@@ -29,8 +29,10 @@ class BajaLogicaTest {
     private final ProductoRepository productos = mock(ProductoRepository.class);
     private final ClienteRepository clientes = mock(ClienteRepository.class);
     private final VentaRepository ventas = mock(VentaRepository.class);
-    private final CategoriaServiceImpl categoriaService = new CategoriaServiceImpl(categorias, productos);
-    private final ClienteServiceImpl clienteService = new ClienteServiceImpl(clientes, ventas);
+    private final CategoriaServiceImpl categoriaService = new CategoriaServiceImpl(categorias, productos,
+            mock(org.springframework.context.ApplicationEventPublisher.class));
+    private final ClienteServiceImpl clienteService = new ClienteServiceImpl(clientes, ventas,
+            mock(org.springframework.context.ApplicationEventPublisher.class));
 
     private Categoria categoria() {
         Categoria c = new Categoria(); c.setId(1L); c.setEstado(true);

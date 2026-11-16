@@ -3,6 +3,8 @@ package pe.edu.pe.PharmaBackend.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +24,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     private static final Logger LOG = LoggerFactory.getLogger(CategoriaServiceImpl.class);
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
+    private final ApplicationEventPublisher eventos;
 
-    public CategoriaServiceImpl(CategoriaRepository categoriaRepository, ProductoRepository productoRepository) {
+    public CategoriaServiceImpl(CategoriaRepository categoriaRepository, ProductoRepository productoRepository,
+            ApplicationEventPublisher eventos) {
         this.categoriaRepository = categoriaRepository;
         this.productoRepository = productoRepository;
+        this.eventos = eventos;
     }
 
     @Override
@@ -44,6 +49,8 @@ public class CategoriaServiceImpl implements CategoriaService {
         categoria.setEstado(t.getEstado());
 
         Categoria catCreada = categoriaRepository.save(categoria);
+        eventos.publishEvent(EventoAuditoria.de("CATEGORIA_REGISTRADA", "Categoria", catCreada.getId(),
+                "Categoría registrada | estado=" + catCreada.getEstado()));
         return convertirResponse(catCreada);
     }
 

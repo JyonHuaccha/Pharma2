@@ -2,6 +2,8 @@ package pe.edu.pe.PharmaBackend.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.pe.PharmaBackend.auditoria.EventoAuditoria;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.pe.PharmaBackend.dto.ClienteRequestDTO;
 import pe.edu.pe.PharmaBackend.dto.ClienteResponseDTO;
@@ -23,11 +25,14 @@ public class ClienteServiceImpl
 
     private final ClienteRepository clienteRepository;
     private final VentaRepository ventaRepository;
+    private final ApplicationEventPublisher eventos;
 
     public ClienteServiceImpl(
-            ClienteRepository clienteRepository, VentaRepository ventaRepository) {
+            ClienteRepository clienteRepository, VentaRepository ventaRepository,
+            ApplicationEventPublisher eventos) {
         this.clienteRepository = clienteRepository;
         this.ventaRepository = ventaRepository;
+        this.eventos = eventos;
     }
 
     @Override
@@ -77,6 +82,9 @@ public class ClienteServiceImpl
 
         Cliente guardado =
                 clienteRepository.save(cliente);
+
+        eventos.publishEvent(EventoAuditoria.de("CLIENTE_REGISTRADO", "Cliente", guardado.getId(),
+                "Cliente registrado | estado=" + guardado.getEstado()));
 
         log.info(
                 "Cliente registrado correctamente id={}",
