@@ -1,0 +1,19 @@
+{
+  "fecha": "15/11/2026 23:01:35",
+  "backend": "672c9ef50baf32693ca8ae97b4902dee3c3c669f",
+  "frontend": "ecec0ecb89a9188d3babb184dcd7325e6060b3d0",
+  "e2e": {
+    "startTime": "2026-11-16T04:01:35.405Z",
+    "duration": 51267.049,
+    "expected": 42,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "postman": {
+    "peticiones": 38,
+    "aserciones": 86,
+    "fallos": 0,
+    "duracion_ms": 4577
+  }
+}
