@@ -1,0 +1,1484 @@
+{
+  "info": {
+    "name": "PharmaSoft S14 Autónoma Huaccha",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "b03dcdf1-21f6-4cbe-945b-e5d191969574",
+    "description": "Ejecutar de 00 a 06. Datos propios, IDs automáticos y comprobaciones reales. Contraseñas en entorno local, no en el repositorio."
+  },
+  "variable": [
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenVendedor",
+      "value": ""
+    },
+    {
+      "key": "tokenAlmacen",
+      "value": ""
+    },
+    {
+      "key": "runId",
+      "value": ""
+    },
+    {
+      "key": "dniDemo",
+      "value": ""
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "clienteId",
+      "value": ""
+    },
+    {
+      "key": "productoId",
+      "value": ""
+    },
+    {
+      "key": "sinStockId",
+      "value": ""
+    },
+    {
+      "key": "ventaId",
+      "value": ""
+    },
+    {
+      "key": "requestIdVenta",
+      "value": ""
+    },
+    {
+      "key": "hoy",
+      "value": ""
+    },
+    {
+      "key": "stockAntes",
+      "value": ""
+    },
+    {
+      "key": "ventasAntes",
+      "value": ""
+    },
+    {
+      "key": "eventosAntes",
+      "value": ""
+    },
+    {
+      "key": "requestIdRechazo",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Inicio de sesión",
+      "item": [
+        {
+          "name": "LOGIN-ADMIN Iniciar sesión admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "LOGIN-ADMIN. Iniciar sesión admin. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"{{passwordAdmin}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LOGIN-VENDEDOR Iniciar sesión vendedor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "LOGIN-VENDEDOR. Iniciar sesión vendedor. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vendedor\",\n  \"password\": \"{{passwordVendedor}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"tokenVendedor\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LOGIN-ALMACEN Iniciar sesión almacen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "LOGIN-ALMACEN. Iniciar sesión almacen. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"almacen\",\n  \"password\": \"{{passwordAlmacen}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"tokenAlmacen\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Preparar datos propios una vez por sesión de capturas",
+      "item": [
+        {
+          "name": "PRE-01 Crear categoría de demostración",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/categorias",
+            "description": "PRE-01. Crear categoría de demostración. Resultado esperado HTTP 201. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Demo S14A {{runId}}\",\n  \"descripcion\": \"Datos propios para capturas Huaccha\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const runId = Date.now() + \"-\" + Math.floor(Math.random()*9000+1000);",
+                  "pm.collectionVariables.set(\"runId\", runId);",
+                  "pm.collectionVariables.set(\"dniDemo\", String(Math.floor(Math.random()*90000000+10000000)));",
+                  "pm.collectionVariables.set(\"hoy\", new Date().toISOString().slice(0,10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"categoriaId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PRE-02 Crear cliente de demostración",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/clientes",
+            "description": "PRE-02. Crear cliente de demostración. Resultado esperado HTTP 201. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"{{dniDemo}}\",\n  \"nombres\": \"Cliente Demo\",\n  \"apellidos\": \"Huaccha S14A\",\n  \"email\": \"demo-{{runId}}@example.test\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"clienteId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PRE-03 Crear producto activo con stock 50",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/productos",
+            "description": "PRE-03. Crear producto activo con stock 50. Resultado esperado HTTP 201. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"AAA Demo S14A {{runId}}\",\n  \"descripcion\": \"Prueba autónoma S14\",\n  \"precio\": 10,\n  \"stock\": 50,\n  \"categoriaId\": \"{{categoriaId}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"productoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PRE-04 Crear producto sin stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/productos",
+            "description": "PRE-04. Crear producto sin stock. Resultado esperado HTTP 201. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin stock S14A {{runId}}\",\n  \"descripcion\": \"Prueba autónoma S14\",\n  \"precio\": 10,\n  \"stock\": 0,\n  \"categoriaId\": \"{{categoriaId}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"sinStockId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Ventas estados HTTP y trazabilidad",
+      "item": [
+        {
+          "name": "PM-01 Registrar venta y guardar ID y requestId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ventas",
+            "description": "PM-01. Registrar venta y guardar ID y requestId. Resultado esperado HTTP 201. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"detalles\": [\n    {\n      \"productoId\": \"{{productoId}}\",\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201) {",
+                  "  const v=pm.response.json(); pm.collectionVariables.set(\"ventaId\",v.id);",
+                  "  pm.collectionVariables.set(\"requestIdVenta\",pm.response.headers.get(\"X-Request-Id\"));",
+                  "  pm.test(\"Autor vendedor y total 20\",()=>{ pm.expect(v.creadoPor).to.eql(\"vendedor\"); pm.expect(v.total).to.eql(20); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-02 Consultar venta registrada y creadoPor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ventas/{{ventaId}}",
+            "description": "PM-02. Consultar venta registrada y creadoPor. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Venta solicitada\",()=>{ pm.expect(String(pm.response.json().id)).to.eql(String(pm.variables.get(\"ventaId\"))); pm.expect(pm.response.json().creadoPor).to.eql(\"vendedor\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-03 Venta sin productos devuelve 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ventas",
+            "description": "PM-03. Venta sin productos devuelve 400. Resultado esperado HTTP 400. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"detalles\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-04 Ventas sin token devuelve 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ventas/{{ventaId}}",
+            "description": "PM-04. Ventas sin token devuelve 401. Resultado esperado HTTP 401. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-05 Almacenero no registra ventas 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ventas",
+            "description": "PM-05. Almacenero no registra ventas 403. Resultado esperado HTTP 403. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAlmacen}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"detalles\": [\n    {\n      \"productoId\": \"{{productoId}}\",\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-06 Venta inexistente devuelve 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ventas/900000000000",
+            "description": "PM-06. Venta inexistente devuelve 404. Resultado esperado HTTP 404. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-07 Stock insuficiente devuelve 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ventas",
+            "description": "PM-07. Stock insuficiente devuelve 409. Resultado esperado HTTP 409. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"detalles\": [\n    {\n      \"productoId\": \"{{sinStockId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Productos estados HTTP",
+      "item": [
+        {
+          "name": "PM-08 Productos paginados devuelve 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos?pagina=0&tamanio=20",
+            "description": "PM-08. Productos paginados devuelve 200. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Máximo 20 filas y contrato página\",()=>{const b=pm.response.json();pm.expect(b.contenido.length).to.be.at.most(20);pm.expect(b.pagina).to.eql(0);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-09 Producto inválido devuelve 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/productos",
+            "description": "PM-09. Producto inválido devuelve 400. Resultado esperado HTTP 400. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"precio\": -1,\n  \"stock\": -2,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-10 Productos sin token devuelve 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos?pagina=0&tamanio=20",
+            "description": "PM-10. Productos sin token devuelve 401. Resultado esperado HTTP 401. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-11 Vendedor no crea productos 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/productos",
+            "description": "PM-11. Vendedor no crea productos 403. Resultado esperado HTTP 403. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"No autorizado\",\n  \"precio\": 10,\n  \"stock\": 1,\n  \"categoriaId\": \"{{categoriaId}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-12 Producto inexistente devuelve 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos/900000000000",
+            "description": "PM-12. Producto inexistente devuelve 404. Resultado esperado HTTP 404. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-13 Tamaño 500 devuelve 409",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos?pagina=0&tamanio=500",
+            "description": "PM-13. Tamaño 500 devuelve 409. Resultado esperado HTTP 409. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Auditoría estados HTTP y nuevos eventos",
+      "item": [
+        {
+          "name": "PM-14 Encontrar la venta en auditoría con el mismo requestId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=100",
+            "description": "PM-14. Encontrar la venta en auditoría con el mismo requestId. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Evento de la venta y requestId coinciden\",()=>{",
+                  "const e=pm.response.json().contenido.find(e=>String(e.entidadId)===String(pm.variables.get(\"ventaId\")));",
+                  "pm.expect(e,\"Evento de la venta\").to.exist;",
+                  "pm.expect(e.requestId).to.eql(pm.variables.get(\"requestIdVenta\"));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-15 Fecha no válida devuelve 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?desde=no-es-fecha",
+            "description": "PM-15. Fecha no válida devuelve 400. Resultado esperado HTTP 400. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-16 Auditoría sin token devuelve 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria",
+            "description": "PM-16. Auditoría sin token devuelve 401. Resultado esperado HTTP 401. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-17 Auditoría vendedor devuelve 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria",
+            "description": "PM-17. Auditoría vendedor devuelve 403. Resultado esperado HTTP 403. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-18 Ruta de auditoría inexistente devuelve 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria/no-existe",
+            "description": "PM-18. Ruta de auditoría inexistente devuelve 404. Resultado esperado HTTP 404. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-19 Rango de fechas invertido devuelve 409",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?desde=2026-12-31&hasta=2026-01-01",
+            "description": "PM-19. Rango de fechas invertido devuelve 409. Resultado esperado HTTP 409. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-20 Verificar evento CLIENTE_REGISTRADO",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?accion=CLIENTE_REGISTRADO&pagina=0&tamanio=100",
+            "description": "PM-20. Verificar evento CLIENTE_REGISTRADO. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Evento de la entidad creada\",()=>pm.expect(pm.response.json().contenido.some(e=>String(e.entidadId)===String(pm.variables.get(\"clienteId\")))).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-21 Verificar evento CATEGORIA_REGISTRADA",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?accion=CATEGORIA_REGISTRADA&pagina=0&tamanio=100",
+            "description": "PM-21. Verificar evento CATEGORIA_REGISTRADA. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Evento de la entidad creada\",()=>pm.expect(pm.response.json().contenido.some(e=>String(e.entidadId)===String(pm.variables.get(\"categoriaId\")))).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Rollback no deja venta ni evento",
+      "item": [
+        {
+          "name": "PM-22 Guardar stock antes del rechazo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos/{{productoId}}",
+            "description": "PM-22. Guardar stock antes del rechazo. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.collectionVariables.set(\"stockAntes\",pm.response.json().stock);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-23 Guardar cantidad de ventas del cliente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ventas/buscar?clienteId={{clienteId}}&pagina=0&tamanio=20",
+            "description": "PM-23. Guardar cantidad de ventas del cliente. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.collectionVariables.set(\"ventasAntes\",pm.response.json().totalElementos);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-24 Guardar cantidad de eventos de venta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=100",
+            "description": "PM-24. Guardar cantidad de eventos de venta. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.collectionVariables.set(\"eventosAntes\",pm.response.json().totalElementos);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-25 Rechazar segunda línea y revertir toda la operación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ventas",
+            "description": "PM-25. Rechazar segunda línea y revertir toda la operación. Resultado esperado HTTP 409. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"detalles\": [\n    {\n      \"productoId\": \"{{productoId}}\",\n      \"cantidad\": 1\n    },\n    {\n      \"productoId\": \"{{sinStockId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.collectionVariables.set(\"requestIdRechazo\",pm.response.headers.get(\"X-Request-Id\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-26 Stock se conserva después del rollback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos/{{productoId}}",
+            "description": "PM-26. Stock se conserva después del rollback. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Stock sin cambios\",()=>pm.expect(pm.response.json().stock).to.eql(Number(pm.variables.get(\"stockAntes\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-27 No se agregó una venta fallida",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/ventas/buscar?clienteId={{clienteId}}&pagina=0&tamanio=20",
+            "description": "PM-27. No se agregó una venta fallida. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Cantidad de ventas sin cambios\",()=>pm.expect(pm.response.json().totalElementos).to.eql(Number(pm.variables.get(\"ventasAntes\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PM-28 No existe evento del requestId rechazado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/auditoria?usuario=vendedor&accion=VENTA_REGISTRADA&pagina=0&tamanio=100",
+            "description": "PM-28. No existe evento del requestId rechazado. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"Eventos sin cambios\",()=>pm.expect(pm.response.json().totalElementos).to.eql(Number(pm.variables.get(\"eventosAntes\"))));",
+                  "pm.test(\"Sin evento de la venta revertida\",()=>pm.expect(pm.response.json().contenido.some(e=>e.requestId===pm.variables.get(\"requestIdRechazo\"))).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Demostración Redis y Actuator",
+      "item": [
+        {
+          "name": "DEMO-01 Estado de salud Oracle y Redis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/health",
+            "description": "DEMO-01. Estado de salud Oracle y Redis. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEMO-02 Métricas disponibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/metrics",
+            "description": "DEMO-02. Métricas disponibles. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DEMO-03 Métrica de aciertos de caché",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/actuator/metrics/cache.gets?tag=cache:productos&tag=result:hit",
+            "description": "DEMO-03. Métrica de aciertos de caché. Resultado esperado HTTP 200. Ejecutar en el orden de la colección.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Respuesta con X-Request-Id\", () => pm.expect(pm.response.headers.get(\"X-Request-Id\")).to.be.a(\"string\").and.not.empty);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
