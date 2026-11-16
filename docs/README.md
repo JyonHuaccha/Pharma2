@@ -1,6 +1,6 @@
 # Evidencias de PharmaSoft
 
-Índice exigido por la actividad autónoma de la sesión 14. Implementación y pruebas automáticas verificadas; capturas propias, ensayos y video se completan por el estudiante.
+Índice exigido por la actividad autónoma de la sesión 14. Implementación, capturas y verificación final registradas el 16/11/2026. Incluye resultados automáticos y tres recorridos asistidos por la interfaz.
 
 ## Documentación
 
@@ -12,9 +12,7 @@
 - [Lista de verificación previa](checklist-demo.md)
 - [Diez respuestas para estudiar la defensa](defensa-tecnica.md)
 - [Guía detallada de capturas](guia-capturas-s14-autonoma.md)
-- [Dos ensayos por completar](registro-ensayos.csv)
-- [Tres corridas manuales por completar](registro-flujo-manual.csv)
-- [Enlace al video por completar](video-enlace.txt)
+- [Tres verificaciones por interfaz](registro-flujo-interfaz.csv)
 - [Postman completo](postman/PharmaBackend.postman_collection.json)
 
 ## Evidencias por etapa
@@ -33,6 +31,8 @@
 - Rama de trabajo: feature/integracion-estabilizacion-huaccha en ambos.
 - Versión de demostración: v1.0-demo, creada sobre la entrega técnica actual. Revisar antes del 19 de noviembre si cambia código.
 
-No se publica el PDF autónomo como completo antes de recibir capturas, tiempos de ensayos y enlace real del video. El estudiante realiza la carga al aula virtual.
+El informe local Huaccha_LP2_S14_Autonoma.pdf reúne las evidencias disponibles y la verificación final. El estudiante realiza la carga al aula virtual. No se atribuyen ensayos orales ni un video que no se realizaron.
 
 Caso técnico verificado: [venta autor evento y log](evidencias/s14-estabilizacion/trazabilidad-verificada.md). Las capturas manuales se incorporarán después.
+
+- [Verificación final S14](verificacion-final-s14.md)

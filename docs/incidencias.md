@@ -80,13 +80,22 @@ Las seis primeras incidencias se detectaron el 12/11/2026. Se conserva su tabla 
 - Corrección: agregar logging.pattern.file con MDC requestId, igual que producción. Commit backend 4305a17.
 - Regresión: arrancar el JAR corregido, ejecutar una petición y comparar X-Request-Id con el archivo. La venta técnica 22255 ya se relacionó con el evento 8821d482 y las líneas de consola.
 
+### INC-12 Restauración de stock antes de finalizar la recarga
+
+- Fecha: 16/11/2026. Módulo: pruebas E2E e integración de catálogo. Severidad: media. Estado: cerrada.
+- Reproducción: correr la suite con más de 5000 productos; E2E-08 provoca 409 y restaura stock mientras la SPA aún está actualizando el catálogo.
+- Esperado: el siguiente caso encuentra el producto con stock restaurado. Obtenido: E2E-10 no encuentra el producto; la traza muestra el catálogo con stock 0.
+- Causa raíz: la limpieza de E2E-08 no esperaba la lectura disparada por el 409; esa lectura podía conservarse en caché después del restablecimiento.
+- Corrección: esperar el estado visible Stock y precios actualizados antes de restaurar el producto. Sin sleeps fijos ni reintentos. Commit frontend 91a20c1.
+- Regresión: 14 pruebas repetidas tres veces, 42 correctas, 0 flaky, sobre PHARMADB y su volumen real. La traza anterior permanece local en tmp/s14a-final/diagnostico/stock-catalogo.zip.
+
 ## Resumen de cierre
 
 | Severidad | Cantidad | Abiertas |
 | --- | --- | --- |
 | Crítica | 0 | 0 |
 | Alta | 6 | 0 |
-| Media | 5 | 0 |
+| Media | 6 | 0 |
 | Baja | 0 | 0 |
 
-Por módulo principal: Ventas 1, Paginación 1, Ordenamiento 1, Migraciones 1, Volumen 1, Arranque 1, Infraestructura E2E 1, Auditoría SPA 1, Pruebas de Ventas 1 y Pruebas API 1 y Trazabilidad 1. Total: once incidencias cerradas. No queda ninguna crítica o alta abierta en este registro. Ensayos, capturas propias y video son actividades de entrega pendientes, no incidencias técnicas resueltas ni pruebas aprobadas.
+Por módulo principal: Ventas 1, Paginación 1, Ordenamiento 1, Migraciones 1, Volumen 1, Arranque 1, Infraestructura E2E 1, Auditoría SPA 1, Pruebas de Ventas 1 y Pruebas API 1 y Trazabilidad 1, más 1 de sincronización E2E del catálogo. Total: doce incidencias cerradas. No queda ninguna crítica o alta abierta en este registro. Ensayos, capturas propias y video son actividades de entrega pendientes, no incidencias técnicas resueltas ni pruebas aprobadas.

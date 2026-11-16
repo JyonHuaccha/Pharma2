@@ -1,0 +1,48 @@
+{
+  "fecha": "16/11/2026",
+  "backend": "7af181e78a21ccfdfae2d3f0c431e8dd199c2b4c",
+  "frontend": "91a20c18f4158e7aad3c87b518d0fe7d9738e19d",
+  "e2e": {
+    "startTime": "2026-11-16T07:26:30.388Z",
+    "duration": 135095.952,
+    "expected": 42,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "postman": {
+    "requests": 38,
+    "assertions": 86,
+    "failed": 0,
+    "durationMs": 6290
+  },
+  "ui": [
+    {
+      "corrida": 1,
+      "inicio": "2026-11-16T07:30:32.366Z",
+      "duracionMs": 133787,
+      "ventaId": 20081,
+      "stockAntes": 100,
+      "stockDespues": 98,
+      "desvio": "Ninguno funcional; medición incluye navegación y captura asistidas"
+    },
+    {
+      "corrida": 2,
+      "inicio": "2026-11-16T07:33:55.580Z",
+      "duracionMs": 39208,
+      "ventaId": 20082,
+      "stockAntes": 100,
+      "stockDespues": 98,
+      "desvio": "Ninguno funcional; medición incluye navegación y captura asistidas"
+    },
+    {
+      "corrida": 3,
+      "inicio": "2026-11-16T07:35:33.547Z",
+      "duracionMs": 36091,
+      "ventaId": 20083,
+      "stockAntes": 100,
+      "stockDespues": 98,
+      "desvio": "Ninguno funcional; medición incluye navegación y captura asistidas"
+    }
+  ]
+}

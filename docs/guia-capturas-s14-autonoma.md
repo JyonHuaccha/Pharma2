@@ -14,7 +14,7 @@ Antes de capturar mueve el puntero fuera del área y usa Win+Shift+S. No hace fa
 2. Reinicia tu backend para incorporar los nuevos eventos. Mi backend temporal de comprobación en 8082 se detendrá al terminar. Tu proceso ya abierto en 8080 se respeta; puede seguir ejecutando código anterior hasta que lo reinicies.
 3. Oracle y Redis deben estar iniciados. En C:\peack\pharma-frontend ejecuta npm start y abre http://localhost:4200. Para estas capturas usa ese frontend actualizado; el contenedor Nginx de 8081 no incorpora un nuevo build por guardar archivos.
 4. Ten a mano tus accesos admin, vendedor y almacen. El entorno local de Postman trae los valores conocidos; si cambiaste una contraseña, actualiza su variable privada. No subas ese archivo privado a GitHub.
-5. Para la demo manual abre en SQL Developer docs/sql/preparar-demo.sql y ejecútalo con F5. Solo usa un esquema de desarrollo. No ejecuta una limpieza masiva. La carga de 5000 productos de la práctica no se repite si ya existe.
+5. Para las pruebas que siguen a Postman usa sus datos PRE. El SQL docs/sql/preparar-demo.sql es una preparación distinta para D-02 y el guion, con nombres fijos y stock 100. No es requisito para A-04. La carga masiva de 5000 productos y 20000 ventas tampoco crea esos ejemplos fijos.
 6. Cuando prepares stock por SQL, usa una base Redis/prefijo de demo sin claves anteriores o limpia únicamente esas claves propias; reiniciar Spring no elimina por sí solo las claves Redis. Para una edición desde la API, CacheEvict sí invalida productos.
 
 ## Importar y preparar Postman
@@ -29,6 +29,20 @@ Antes de capturar mueve el puntero fuera del área y usa Win+Shift+S. No hace fa
 8. Para ver las variables: haz clic en el nombre de la colección > Variables. clienteId, productoId, categoriaId, ventaId y requestIdVenta se llenan solos. No crees variables de entorno con esos mismos nombres porque ocultarían las de la colección. Evita escribirlos manualmente.
 9. Los tokens duran 60 minutos. Si obtienes 401 en un caso que esperaba 200/201, repite solo los tres LOGIN y vuelve al caso; no necesitas ejecutar PRE otra vez. Las pruebas que esperan 401 deben seguir usando No Auth.
 10. La colección también puede correrse de una vez: clic derecho > Run collection > Run. Mantén una iteración y el orden. Al terminar guarda PM-resumen.png con 38 requests y 86 tests correctos. El Runner crea nuevas ventas/datos al repetir PRE y PM-01; no ejecutes otra suite a la vez durante las comparaciones de rollback.
+
+## Qué datos crea cada preparación
+
+Para A-02, A-03, A-04 y E2E-04 usa el conjunto de Postman que ya preparaste. No necesitas ejecutar el SQL de demo para esas pruebas.
+
+| Preparación | Cliente | Producto | Stock inicial |
+| --- | --- | --- | --- |
+| Postman PRE-01 a PRE-04 | Cliente Demo Huaccha S14A, DNI aleatorio guardado en dniDemo | AAA Demo S14A seguido de runId | 50; cambia al vender |
+| SQL preparar-demo.sql | Cliente Demo Huaccha, DNI fijo 74140001 | AAA Demo Huaccha S14 | 100 al prepararlo |
+| Playwright | Cliente E2E y datos nuevos de cada ejecución | AAA E2E S14A seguido de un identificador | Lo prepara la suite |
+
+El conjunto SQL se describe por separado para las corridas controladas de D-02 y el guion. Haber completado Postman no ejecuta ese SQL ni crea sus nombres fijos. La carga masiva de 5000 productos y 20000 ventas es otra preparación y tampoco sustituye los datos de demostración.
+
+Si no ves los datos de Postman en la SPA, confirma baseUrl=http://localhost:8080 y que el backend y DBeaver usan el mismo esquema. En PHARMADB puedes consultarlos con SELECT id,dni,nombres,apellidos FROM clientes WHERE apellidos='Huaccha S14A'; y SELECT id,nombre,precio,stock FROM producto WHERE nombre LIKE 'AAA Demo S14A %';.
 
 ## Orden de trabajo
 
@@ -90,19 +104,19 @@ ACTOR: VENDEDOR y ADMIN
 
 RESULTADO ESPERADO: La venta muestra creado_por=vendedor y el mismo ID y requestId relacionan evento y log.
 
-1. Prepara datos con docs/sql/preparar-demo.sql en el esquema usado por TU backend. La guía de inicio explica cómo verificarlo. El producto AAA Demo Huaccha S14 queda con stock 100 y precio 10; el cliente tiene DNI 74140001.
+1. Usa los datos que YA creaste con Postman. Haz clic en el nombre de la colección PharmaSoft S14 Autónoma Huaccha y abre Variables. Copia el valor actual de dniDemo y el de runId. El cliente se llama Cliente Demo Huaccha S14A y su DNI es dniDemo. El producto se llama AAA Demo S14A seguido del valor de runId. También puedes consultar las respuestas de PRE-02 y PRE-03 si siguen abiertas. No repitas PRE-01 a PRE-04 para buscar los mismos datos: una nueva ejecución crea otro conjunto.
 
-2. Inicia sesión como vendedor, abre Ventas > Nueva venta, busca DNI 74140001, selecciona el cliente y agrega dos unidades de AAA Demo Huaccha S14. Revisa y confirma sin imprimir automáticamente. Anota el ID real del comprobante; no uses un ID de ejemplo.
+2. Inicia sesión como vendedor y abre Ventas > Nueva venta. Busca el DNI que acabas de copiar; también puedes buscar Huaccha S14A. Selecciona el cliente y busca el nombre completo AAA Demo S14A seguido de runId. Agrega dos unidades, revisa y confirma sin impresión automática. Anota el ID real del comprobante. El producto empezó con stock 50; después de PM-01 normalmente tendrá 48, y esta nueva venta lo dejaría en 46. Usa el stock real si ya hiciste más ventas: en A-04 no se exige que sea 100.
 
-3. Abre SQL Developer con la misma conexión del backend. Abre docs/sql/trazabilidad-demo.sql, pulsa F5 e introduce ese ID. La primera consulta muestra ventas.id, fecha, cliente_id, total, estado y creado_por. Guarda A-04.1.png mostrando el ID y creado_por=vendedor.
+3. En DBeaver abre tu conexión a PHARMADB (o al esquema real de tu backend) y abre un Editor SQL. Ejecuta SELECT id, fecha, cliente_id, total, estado, creado_por FROM ventas WHERE id = ID_REAL; sustituyendo ID_REAL por el número del comprobante. Selecciona la sentencia y pulsa Ctrl+Enter. Guarda A-04.1.png con esa fila y creado_por=vendedor. No ejecutes el texto ID_REAL sin reemplazarlo.
 
-4. En la segunda consulta localiza VENTA_REGISTRADA para el mismo ID. Copia su request_id y comprueba usuario=vendedor. En Angular como admin puedes mostrar también ese evento filtrando usuario, acción y fecha. Guarda A-04.2.png.
+4. En el mismo editor ejecuta SELECT fecha, usuario, accion, entidad, entidad_id, detalle, request_id FROM auditoria_eventos WHERE entidad = 'Venta' AND accion = 'VENTA_REGISTRADA' AND entidad_id = ID_REAL ORDER BY fecha DESC; usando el mismo ID numérico. Copia request_id de la fila. Guarda A-04.2.png con ID, usuario vendedor y request_id. Puedes complementar con esa misma venta en la pantalla Auditoría de Angular.
 
-5. En la consola del backend de IntelliJ pulsa Ctrl+F y busca el request_id copiado. Deben verse Venta preparada | ventaId=... y POST /api/v1/ventas -> 201 con el mismo identificador entre corchetes. Guarda A-04.3.png. Si usas archivo, ejecuta en PowerShell: Get-Content C:\peack\pharmaSoft-main\logs\pharma-backend.log | Select-String -SimpleMatch "TU_REQUEST_ID". Sustituye TU_REQUEST_ID por el real.
+5. En la consola del backend de IntelliJ pulsa Ctrl+F y busca ese request_id. Deben verse Venta preparada | ventaId=... y POST /api/v1/ventas -> 201 con el mismo identificador entre corchetes. Guarda A-04.3.png. Si usas el archivo, ejecuta Get-Content C:\peack\pharmaSoft-main\logs\pharma-backend.log | Select-String -SimpleMatch "TU_REQUEST_ID", reemplazando TU_REQUEST_ID por el real.
 
-6. En dev, si no se genera archivo de log, configura LOGGING_FILE_NAME=logs/pharma-backend.log antes de reiniciar. La consola ya contiene requestId. No captures Authorization, contraseña ni el token completo.
+6. Si no hay archivo de log en dev, usa la consola o configura LOGGING_FILE_NAME=logs/pharma-backend.log ANTES de la venta que vas a documentar. Reiniciar no recupera líneas antiguas de una consola ya borrada. Evita capturar contraseñas, Authorization o JWT completos.
 
-7. Si deseas comprobar la venta desde Postman, pon ventaId y requestIdVenta con esos valores reales en Variables de la colección y ejecuta PM-02 y PM-14. Si luego corres la colección completa, PM-01 los sustituirá por la venta que acaba de crear.
+7. Si quieres validar esta venta nueva en PM-02 y PM-14, actualiza ventaId y requestIdVenta con sus valores reales en Variables de la colección. Hazlo después de completar PM-22 a PM-28 para no alterar sus comparaciones. No vuelvas a ejecutar PM-01 esperando consultar esta misma venta, porque PM-01 crea otra.
 
 Archivos: A-04.1.png, A-04.2.png, A-04.3.png.
 
@@ -177,11 +191,11 @@ ACTOR: VENDEDOR
 
 RESULTADO ESPERADO: Una venta de dos unidades descuenta exactamente dos y Productos lo muestra sin F5.
 
-1. En Productos filtra la categoría S14 Demo Huaccha y anota el stock del producto de demo; toma E2E-04.1.png.
+1. Usa la categoría creada en PRE-01: se llama Demo S14A seguida de runId. En Productos elígela y localiza el producto AAA Demo S14A seguido de ese mismo runId, que creó PRE-03. Anota su stock actual y toma E2E-04.1.png. No busques S14 Demo Huaccha si solo ejecutaste Postman.
 
-2. Registra dos unidades desde Ventas > Nueva venta para el cliente de demo. Desmarca imprimir antes de confirmar. Guarda E2E-04.2.png del comprobante.
+2. Desde Ventas > Nueva venta elige el cliente de PRE-02 usando dniDemo y registra dos unidades de ese producto. Desmarca imprimir antes de confirmar. Guarda E2E-04.2.png del comprobante.
 
-3. Usa el enlace Productos del menú, sin F5. Filtra la misma categoría y comprueba stockAntes-2. Guarda E2E-04.3.png. No afirmes que siempre será 98 si ya vendiste antes sin preparar de nuevo.
+3. Usa el enlace Productos del menú, sin F5, y filtra la misma categoría. Comprueba stockAntes-2 y guarda E2E-04.3.png. No presupongas stock 100 o final 98: esta prueba usa el valor que anotaste antes de vender.
 
 Archivos: E2E-04.1.png, E2E-04.2.png, E2E-04.3.png.
 
@@ -914,7 +928,7 @@ ACTOR: VENDEDOR
 
 RESULTADO ESPERADO: Tres verificaciones manuales registran venta real, duración y stock 100 a 98 sin desvíos ocultos.
 
-1. Antes de cada corrida, ejecuta preparar-demo.sql en tu esquema de desarrollo. Asegura coherencia de la caché como explica el checklist; un cambio por SQL no ejecuta CacheEvict.
+1. Este caso D-02 usa expresamente el conjunto SQL, diferente del creado por Postman. Antes de cada corrida, ejecuta preparar-demo.sql en tu esquema de desarrollo. Asegura coherencia de la caché como explica el checklist; un cambio por SQL no ejecuta CacheEvict.
 
 2. Cierra sesión. Inicia el cronómetro. Entra vendedor, selecciona cliente DNI 74140001, producto AAA Demo Huaccha S14 y cantidad 2, confirma y revisa comprobante.
 
